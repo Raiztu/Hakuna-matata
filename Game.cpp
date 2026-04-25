@@ -20,27 +20,41 @@ bool Game::init(std::string title, int w, int h, int flags) {
     }
     std::cout << "renderer created" << std::endl;
 
-    
-    if (!TextureManager::Instance().load("assets/menu_bg1.png", "menu_bg", renderer_)) {
+    // Загрузка текстур
+    if (!TextureManager::Instance().load("assets/menu_bg2.png", "menu_bg", renderer_)) {
         std::cerr << "Failed to load menu background" << std::endl;
     }
 
-    if (!TextureManager::Instance().load("assets/play_button.png", "play_btn", renderer_)) {
+    if (!TextureManager::Instance().load("assets/play_button1.png", "play_btn", renderer_)) {
         std::cerr << "Failed to load play button" << std::endl;
         return false;
     }
 
-    if (!TextureManager::Instance().load("assets/exit_button.png", "exit_btn", renderer_)) {
+    if (!TextureManager::Instance().load("assets/exit_button1.png", "exit_btn", renderer_)) {
         std::cerr << "Failed to load exit button" << std::endl;
         return false;
     }
 
-    playButton_.load("play_btn", 210, 653, 300, 80);
-    exitButton_.load("exit_btn", 210, 765, 300, 80);
+    if (!TextureManager::Instance().load("assets/volume_da.png", "volume_icon", renderer_)) {
+        std::cerr << "Failed to load volume button" << std::endl;
+        return false;
+    }
+
+    if (!TextureManager::Instance().load("assets/help.png", "help_icon", renderer_)) {
+        std::cerr << "Failed to load hepl button" << std::endl;
+        return false;
+    }
+
+    // Настраиваем
+    playButton_.load("play_btn", 198, 653, 325, 80);
+    exitButton_.load("exit_btn", 198, 765, 325, 80);
+    volumeIcon_.load("volume_icon", 578, 30, 112, 112);
+    helpIcon_.load("help_icon", 30, 30, 112, 112);
 
     return true;
 }
 
+// Кликабельность
 void Game::handleMenuClick(int x, int y) {
     float playLeft = 210, playRight = 510, playTop = 653, playBottom = 733;
     float exitLeft = 210, exitRight = 510, exitTop = 765, exitBottom = 845;
@@ -58,6 +72,7 @@ void Game::handleMenuClick(int x, int y) {
     }
 }
 
+// Уже непосредственно сама отрисовка
 void Game::render() {
     // Очищаем экран
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
@@ -69,6 +84,8 @@ void Game::render() {
 
         playButton_.draw(renderer_);
         exitButton_.draw(renderer_);
+        volumeIcon_.draw(renderer_);
+        helpIcon_.draw(renderer_);
     }
     else if (currentState_ == STATE_GAME) {
         SDL_SetRenderDrawColor(renderer_, 100, 100, 255, 255);

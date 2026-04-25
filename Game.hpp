@@ -33,6 +33,8 @@ private:
 
     GameObject playButton_;      
     GameObject exitButton_;     
+    GameObject volumeIcon_;
+    GameObject helpIcon_;
 
     void handleMenuClick(int x, int y);
 
