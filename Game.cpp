@@ -1,5 +1,6 @@
 #include "Game.hpp" 
 #include "InputHandler.hpp"
+#include "MenuInputHandler.hpp"
 #include "TextureManager.hpp"
 
 #include <iostream>
@@ -19,6 +20,9 @@ bool Game::init(std::string title, int w, int h, int flags) {
         return false;
     }
     std::cout << "renderer created" << std::endl;
+
+    menuHandler_ = new MenuInputHandler();
+    currentHandler_ = menuHandler_;
 
     // Загрузка текстур
     if (!TextureManager::Instance().load("assets/menu_bg2.png", "menu_bg", renderer_)) {
@@ -52,24 +56,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
     helpIcon_.load("help_icon", 30, 30, 112, 112);
 
     return true;
-}
-
-// Кликабельность
-void Game::handleMenuClick(int x, int y) {
-    float playLeft = 210, playRight = 510, playTop = 653, playBottom = 733;
-    float exitLeft = 210, exitRight = 510, exitTop = 765, exitBottom = 845;
-
-    if (x >= playLeft && x <= playRight && y >= playTop && y <= playBottom) {
-        std::cout << "Play button clicked! Switching to game..." << std::endl;
-        currentState_ = STATE_GAME;
-        return;
-    }
-
-    if (x >= exitLeft && x <= exitRight && y >= exitTop && y <= exitBottom) {
-        std::cout << "Exit button clicked! Quitting..." << std::endl;
-        stopGame();  
-        return;
-    }
 }
 
 // Уже непосредственно сама отрисовка
@@ -113,22 +99,23 @@ void Game::handleEvents() {
         case SDL_EVENT_QUIT:
             stopGame();
             break;
-
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            if (event.button.button == SDL_BUTTON_LEFT) {
-                if (currentState_ == STATE_MENU) {
-                    handleMenuClick(event.button.x, event.button.y);
-                }
-                else if (currentState_ == STATE_GAME) {
-                }
+        default:
+            if (currentHandler_) {
+                currentHandler_->handle(event);
             }
             break;
+        }
+    }
 
-        case SDL_EVENT_KEY_DOWN:
-            if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
-                stopGame();
-            }
-            break;
+    if (currentState_ == STATE_MENU && menuHandler_) {
+        if (menuHandler_->playClicked) {
+            std::cout << "Play button clicked! Switching to game..." << std::endl;
+            currentState_ = STATE_GAME;
+            menuHandler_->resetFlags();
+        }
+        if (menuHandler_->exitClicked) {
+            std::cout << "Exit button clicked! Quitting..." << std::endl;
+            stopGame();
         }
     }
 }
@@ -140,6 +127,10 @@ void Game::clean() {
         go.clean();
         main_char.clean();
     }
+
+    delete menuHandler_;
+    menuHandler_ = nullptr;
+    currentHandler_ = nullptr;
 
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);

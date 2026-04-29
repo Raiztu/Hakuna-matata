@@ -1,17 +1,31 @@
-#pragma once
+﻿#pragma once  // Защита от многократного включения файла
 
-#include <cmath>
+#include <cmath>  // Для математической функции sqrt (квадратный корень)
 
+// Класс для работы с двухмерными векторами (точками на плоскости)
 class Vector2D {
 private:
-	float x_;
-	float y_;
+    float x_;  // Координата X (приватная, доступ только внутри класса)
+    float y_;  // Координата Y
 
 public:
-	Vector2D(float x, float y) : x_(x), y_(y) {}
-	float get_x() { return x_; }
-	float get_y() { return y_; }
-	void set_x(float new_x) { x_ = new_x; }
-	void set_y(float new_y) { y_ = new_y; }
-	float length() { return sqrt(x_ * x_ + y_ * y_); }
+    // Конструктор - вызывается при создании объекта Vector2D
+    // Принимает начальные координаты x и y
+    Vector2D(float x, float y) : x_(x), y_(y) {}
+
+    // Геттер (получатель) для координаты X
+    float get_x() { return x_; }
+
+    // Геттер для координаты Y
+    float get_y() { return y_; }
+
+    // Сеттер (установщик) для координаты X
+    void set_x(float new_x) { x_ = new_x; }
+
+    // Сеттер для координаты Y
+    void set_y(float new_y) { y_ = new_y; }
+
+    // Вычисляет длину вектора по теореме Пифагора
+    // length = sqrt(x² + y²)
+    float length() { return sqrt(x_ * x_ + y_ * y_); }
 };
