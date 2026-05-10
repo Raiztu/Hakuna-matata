@@ -29,6 +29,7 @@ public:
 private:
     bool running_ = false;
     GameState currentState_ = STATE_MENU;
+
     SDL_Window* window_;
     SDL_Renderer* renderer_;
 
@@ -43,6 +44,11 @@ private:
     GameObject helpIcon_;
 
 
-    GameObject go;
-    Player main_char;
+    GameObject confirmDialogBg_;    
+    GameObject confirmButton_;      
+    GameObject cancelButton_;       
+
+
+    GameObject helpDialogBg_;
+    GameObject IseeButton_;
 };
