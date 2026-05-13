@@ -1,4 +1,4 @@
-#include "Game.hpp" 
+﻿#include "Game.hpp" 
 #include "InputHandler.hpp"
 #include "MenuInputHandler.hpp"
 #include "TextureManager.hpp"
@@ -24,17 +24,28 @@ bool Game::init(std::string title, int w, int h, int flags) {
     menuHandler_ = new MenuInputHandler();
     currentHandler_ = menuHandler_;
 
-    // �������� �������
-    if (!TextureManager::Instance().load("assets/menu_bg2.png", "menu_bg", renderer_)) {
+    // По тексту
+    // Инициализация 
+    if (!TextureManager::Instance().initTTF()) {
+        return false;
+    }
+    // Загрузка шрифта
+    if (!TextureManager::Instance().loadFont("assets/anime-ace-v3.ttf", "main_font", 21)) {
+        std::cerr << "Failed to load main font" << std::endl; // Продолжаем работу, но текст не будет отображаться 
+    }
+
+
+    // Загрузка текстур
+    if (!TextureManager::Instance().load("assets/menu_bg.png", "menu_bg", renderer_)) {
         std::cerr << "Failed to load menu background" << std::endl;
     }
 
-    if (!TextureManager::Instance().load("assets/play_button1.png", "play_btn", renderer_)) {
+    if (!TextureManager::Instance().load("assets/play_button.png", "play_btn", renderer_)) {
         std::cerr << "Failed to load play button" << std::endl;
         return false;
     }
 
-    if (!TextureManager::Instance().load("assets/exit_button1.png", "exit_btn", renderer_)) {
+    if (!TextureManager::Instance().load("assets/exit_button.png", "exit_btn", renderer_)) {
         std::cerr << "Failed to load exit button" << std::endl;
         return false;
     }
@@ -44,88 +55,112 @@ bool Game::init(std::string title, int w, int h, int flags) {
         return false;
     }
 
-    if (!TextureManager::Instance().load("assets/help1.png", "help_icon", renderer_)) {
+    if (!TextureManager::Instance().load("assets/help.png", "help_icon", renderer_)) {
         std::cerr << "Failed to load hepl button" << std::endl;
         return false;
     }
-    //////////////////////////////////////////// ��� ������
-    if (!TextureManager::Instance().load("assets/confirm_bg1.png", "confirm_bg", renderer_)) {
+    //////////////////////////////////////////// Для выхода
+    if (!TextureManager::Instance().load("assets/confirm_bg.png", "confirm_bg", renderer_)) {
         std::cerr << "Warning: confirm_bg.png not loaded" << std::endl;
     }
 
     if (!TextureManager::Instance().load("assets/yes_button.png", "confirm_btn", renderer_)) {
-        std::cerr << "Warning: confirm_btn.png not loaded" << std::endl;
+        std::cerr << "Warning: yes_btn.png not loaded" << std::endl;
     }
 
     if (!TextureManager::Instance().load("assets/no_button.png", "cancel_btn", renderer_)) {
-        std::cerr << "Warning: cancel_btn.png not loaded" << std::endl;
+        std::cerr << "Warning: no_btn.png not loaded" << std::endl;
     }
-    //////////////////////////////////////////// ��� ������
-    if (!TextureManager::Instance().load("assets/confirm_bg1.png", "help_bg", renderer_)) {
-        std::cerr << "Warning: confirm_bg.png not loaded" << std::endl;
+    //////////////////////////////////////////// Для помощи
+    if (!TextureManager::Instance().load("assets/help_bg.png", "help_bg", renderer_)) {
+        std::cerr << "Warning: help_bg.png not loaded" << std::endl;
     }
 
     if (!TextureManager::Instance().load("assets/Isee_button.png", "Isee_btn", renderer_)) {
-        std::cerr << "Warning: confirm_btn.png not loaded" << std::endl;
+        std::cerr << "Warning: Isee_btn.png not loaded" << std::endl;
     }
 
-    // �����������
+    ///////////////////////////////////////////////////////// Игра сама
+    if (!TextureManager::Instance().load("assets/game_bg.png", "game_bg", renderer_)) {
+        std::cerr << "Failed to load game background" << std::endl;
+    }
+
+    // Настраиваем
     playButton_.load("play_btn", 198, 653, 325, 80);
     exitButton_.load("exit_btn", 198, 765, 325, 80);
     volumeIcon_.load("volume_icon", 578, 30, 112, 112);
     helpIcon_.load("help_icon", 30, 30, 112, 112);
 
-    /////////////////////////////////// ��� ������
+    /////////////////////////////////// Для выхода
     confirmDialogBg_.load("confirm_bg", 35, 305, 650, 350);
     confirmButton_.load("confirm_btn", 190, 545, 120, 80);
     cancelButton_.load("cancel_btn", 410, 545, 120, 80);
 
-    /////////////////////////////////// ��� ������
+    /////////////////////////////////// Для помощи
     helpDialogBg_.load("help_bg", 35, 305, 650, 350);
     IseeButton_.load("Isee_btn", 300, 545, 120, 80);  
     return true;
 }
 
-// ��� ��������������� ���� ���������
+// Отрисовка текста
+void Game::renderHelpText() {
+    SDL_Color textColor = { 0, 0, 0, 0 };
+
+    std::string helpText =
+        u8"   КАК ИГРАТЬ В ВИСЕЛИЦУ   \n\n"
+        "1. Компьютер загадывает слово\n"
+        "2. Пытайтесь угадать буквы по одной\n"
+        "3. Каждая ошибка рисует часть виселицы\n"
+        "4. Угадайте все буквы до того, как виселица будет построена!\n\n"
+        "Удачи и хорошей игры!";
+
+    TextureManager::Instance().drawTextWrapped(helpText, "main_font", 50, 320, 650, textColor, renderer_); // Отрисовка текста с автоматическим переносом
+}
+
+// Уже непосредственно сама отрисовка
 void Game::render() {
-    // ������� �����
+    // Очищаем экран
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
     SDL_RenderClear(renderer_);
 
-    // ������ � ����������� �� ���������
+    // Рисуем в зависимости от состояния
     if (currentState_ == STATE_MENU) {
         TextureManager::Instance().draw("menu_bg", 0, 0, 720, 960, renderer_);
+        volumeIcon_.draw(renderer_);
+        helpIcon_.draw(renderer_);
 
         if (menuHandler_->isConfirmMode) {
-            // ������ ������
+            // Диалог выхода
             confirmDialogBg_.draw(renderer_);
             confirmButton_.draw(renderer_);
             cancelButton_.draw(renderer_);
 
-            // ��� �������
-            volumeIcon_.draw(renderer_);
-            helpIcon_.draw(renderer_);
         }
-        else if (menuHandler_->isHelpMode) {  // ������ ������
+        else if (menuHandler_->isHelpMode) {  // Диалог помощи
             helpDialogBg_.draw(renderer_);
             IseeButton_.draw(renderer_);
 
-            // ��� �������
-            volumeIcon_.draw(renderer_);
-            helpIcon_.draw(renderer_);
+            // Отрисовка текста помощи
+            renderHelpText();
         }
         else {
-            // ������ ������ ����
+            // Рисуем кнопки меню
             playButton_.draw(renderer_);
             exitButton_.draw(renderer_);
-            volumeIcon_.draw(renderer_);
-            helpIcon_.draw(renderer_);
         }
     }
     else if (currentState_ == STATE_GAME) {
-        SDL_SetRenderDrawColor(renderer_, 100, 100, 255, 255);
-        SDL_RenderClear(renderer_);
-        std::cout << "Game state - rendering game..." << std::endl;
+        TextureManager::Instance().draw("game_bg", 0, 0, 720, 960, renderer_);
+        volumeIcon_.draw(renderer_);
+        helpIcon_.draw(renderer_);
+
+        if  (menuHandler_->isHelpMode) {  // Диалог помощи
+            helpDialogBg_.draw(renderer_);
+            IseeButton_.draw(renderer_);
+
+            // Отрисовка текста помощи
+            renderHelpText();
+        }
     }
 
     SDL_RenderPresent(renderer_);
@@ -157,21 +192,21 @@ void Game::handleEvents() {
 
     if (currentState_ == STATE_MENU && menuHandler_) {
         if (menuHandler_->isConfirmMode) {
-            // � ������ �������������
+            // В режиме подтверждения
             if (menuHandler_->confirmExitConfirmed) {
-                stopGame();  // �������
+                stopGame();  // Выходим
             }
             if (menuHandler_->confirmExitCancelled) {
-                menuHandler_->exitConfirmMode();  // ������������ � ����
+                menuHandler_->exitConfirmMode();  // Возвращаемся в меню
             }
         }
-        else if (menuHandler_->isHelpMode) {  // ����� ������
+        else if (menuHandler_->isHelpMode) {  // Режим помощи
             if (menuHandler_->helpConfirmed) {
-                menuHandler_->exitHelpMode();  // ��������� ������ ������
+                menuHandler_->exitHelpMode();  // Закрываем диалог помощи
             }
         }
         else {
-            // ������� ����� ����
+            // Обычный режим меню
             if (menuHandler_->playClicked) {
                 std::cout << "Play button clicked! Switching to game..." << std::endl;
                 currentState_ = STATE_GAME;
@@ -183,10 +218,21 @@ void Game::handleEvents() {
             }
         }
     }
+    else if (currentState_ == STATE_GAME && menuHandler_) {
+        if (menuHandler_->isHelpMode) {  // Режим помощи
+            if (menuHandler_->helpConfirmed) {
+                menuHandler_->exitHelpMode();  // Закрываем диалог помощи
+            }
+        }
+    }
+
 }
 
 void Game::clean() {
     std::cout << "Cleaning up..." << std::endl;
+
+    // Очистка TTF 
+    TextureManager::Instance().cleanupTTF();
 
     delete menuHandler_;
     menuHandler_ = nullptr;

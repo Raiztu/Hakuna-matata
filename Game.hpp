@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "GameObject.hpp"
 #include "InputHandler.hpp"
@@ -33,7 +33,7 @@ private:
     SDL_Window* window_;
     SDL_Renderer* renderer_;
 
-    // ����������� �����
+    // Обработчики ввода
     MenuInputHandler* menuHandler_;
     InputHandler* currentHandler_;
 
@@ -51,4 +51,7 @@ private:
 
     GameObject helpDialogBg_;
     GameObject IseeButton_;
+
+    // Mетод для отрисовки текста помощи
+    void renderHelpText();
 };

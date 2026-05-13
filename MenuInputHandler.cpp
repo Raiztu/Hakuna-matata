@@ -1,4 +1,4 @@
-#include "MenuInputHandler.hpp"
+ï»¿#include "MenuInputHandler.hpp"
 
 MenuInputHandler::MenuInputHandler() : playClicked(false), exitClicked(false), confirmExitConfirmed(false), confirmExitCancelled(false), isConfirmMode(false), helpConfirmed(false), isHelpMode(false) {}
 
@@ -15,12 +15,12 @@ bool MenuInputHandler::checkButtonClick(int x, int y) {
     }
 
     if (x >= exitLeft && x <= exitRight && y >= exitTop && y <= exitBottom) {
-        enterConfirmMode();  // ïåðåêëþ÷àåì â ðåæèì ïîäòâåðæäåíèÿ
+        enterConfirmMode();  // Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ð² Ñ€ÐµÐ¶Ð¸Ð¼ Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð¸Ñ
         return true;
     }
 
     if (x >= helpLeft && x <= helpRight && y >= helpTop && y <= helpBottom) {
-        enterHelpMode();  // Âêëþ÷àåì ðåæèì ïîìîùè
+        enterHelpMode();  // Ð’ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ñ€ÐµÐ¶Ð¸Ð¼ Ð¿Ð¾Ð¼Ð¾Ñ‰Ð¸
         return true;
     }
 
@@ -67,7 +67,7 @@ void MenuInputHandler::resetFlags() {
     helpConfirmed = false;
 }
 
-// Âûõîä
+// Ð’Ñ‹Ñ…Ð¾Ð´
 void MenuInputHandler::enterConfirmMode() {
     isConfirmMode = true;
     resetFlags();  
@@ -78,7 +78,7 @@ void MenuInputHandler::exitConfirmMode() {
     resetFlags();
 }
 
-// Ïîìîùü
+// ÐŸÐ¾Ð¼Ð¾Ñ‰ÑŒ
 void MenuInputHandler::enterHelpMode() {
     isHelpMode = true;
     isConfirmMode = false;
@@ -112,13 +112,13 @@ void MenuInputHandler::onKeyDown(SDL_Event event) {
 
     if (isKeyDown(SDL_SCANCODE_ESCAPE)) {
         if (isConfirmMode) {
-            confirmExitCancelled = true;  // Escape îòìåíÿåò äèàëîã âûõîäà
+            confirmExitCancelled = true;  // Escape Ð¾Ñ‚Ð¼ÐµÐ½ÑÐµÑ‚ Ð´Ð¸Ð°Ð»Ð¾Ð³ Ð²Ñ‹Ñ…Ð¾Ð´Ð°
         }
-        else if (isHelpMode) {  // Escape çàêðûâàåò äèàëîã ïîìîùè
+        else if (isHelpMode) {  // Escape Ð·Ð°ÐºÑ€Ñ‹Ð²Ð°ÐµÑ‚ Ð´Ð¸Ð°Ð»Ð¾Ð³ Ð¿Ð¾Ð¼Ð¾Ñ‰Ð¸
             exitHelpMode();
         }
         else {
-            exitClicked = true;  // Escape âûõîäèò èç èãðû
+            exitClicked = true;  // Escape Ð²Ñ‹Ñ…Ð¾Ð´Ð¸Ñ‚ Ð¸Ð· Ð¸Ð³Ñ€Ñ‹
         }
     }
 }
