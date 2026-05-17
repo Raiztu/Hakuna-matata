@@ -5,6 +5,10 @@
 
 #include <iostream>
 
+Game::Game() : mixer_(nullptr), musicAudio_(nullptr), musicTrack_(nullptr) {}
+Game::~Game() { stopMusic(); }
+
+
 bool Game::init(std::string title, int w, int h, int flags) {
 
     window_ = SDL_CreateWindow(title.c_str(), w, h, flags);
@@ -20,6 +24,28 @@ bool Game::init(std::string title, int w, int h, int flags) {
         return false;
     }
     std::cout << "renderer created" << std::endl;
+
+    // Инициализация SDL для работы с аудио
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {  
+        // Если инициализация не удалась - выводим ошибку и прерываем запуск
+        std::cerr << "SDL could not initialize! SDL Error" << std::endl;
+        return false;  
+    }
+    sdlInitialized_ = true; // SDL успешно инициализирована
+    
+    // Инициализация SDL_mixer 
+    if (!MIX_Init()) {
+        std::cerr << "MIX_Init failed" << std::endl; //// Если ошибка - сообщаем и прерываем запуск
+        return false;
+    }
+
+    // Создаём микшер, привязанный к устройству воспроизведения по умолчанию
+    mixer_ = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
+    if (!mixer_) {
+        std::cerr << "MIX_CreateMixerDevice failed" << std::endl;
+        MIX_Quit();
+        return false;
+    }
 
     menuHandler_ = new MenuInputHandler();
     currentHandler_ = menuHandler_;
@@ -80,6 +106,27 @@ bool Game::init(std::string title, int w, int h, int flags) {
         std::cerr << "Warning: Isee_btn.png not loaded" << std::endl;
     }
 
+    //////////////////////////////////////////// Для звука
+    if (!TextureManager::Instance().load("assets/sound_bg.png", "sound_bg", renderer_)) {
+        std::cerr << "Warning: sound_bg.png not loaded" << std::endl;
+        return false;
+    }
+
+    if (!TextureManager::Instance().load("assets/ok_button.png", "sound_btn", renderer_)) {
+        std::cerr << "Warning: ok_button.png not loaded" << std::endl;
+        return false;
+    }
+
+    if (!TextureManager::Instance().load("assets/slider_bg.png", "slider_bg", renderer_)) { // Для ползунка
+        std::cerr << "Warning: slider_bg.png not loaded" << std::endl;
+        return false;
+    }
+
+    if (!TextureManager::Instance().load("assets/slider_handle.png", "slider_handle", renderer_)) {
+        std::cerr << "Warning: slider_handle.png not loaded" << std::endl;
+        return false;
+    }
+
     ///////////////////////////////////////////////////////// Игра сама
     if (!TextureManager::Instance().load("assets/game_bg.png", "game_bg", renderer_)) {
         std::cerr << "Failed to load game background" << std::endl;
@@ -99,7 +146,85 @@ bool Game::init(std::string title, int w, int h, int flags) {
     /////////////////////////////////// Для помощи
     helpDialogBg_.load("help_bg", 35, 305, 650, 350);
     IseeButton_.load("Isee_btn", 300, 545, 120, 80);  
+
+
+    ////////////////////////////////// Для звука
+    soundDialogBg_.load("sound_bg", 35, 305, 650, 350);
+    soundOkButton_.load("sound_btn", 300, 545, 120, 80);
+    sliderBg_.load("slider_bg", menuHandler_->sliderX, menuHandler_->sliderY - 10, 400, 20); // X-координата левого края полоски, Y-координата верхнего края полоски 
+    sliderHandle_.load("slider_handle", menuHandler_->sliderHandleX, menuHandler_->sliderY - 20, 40, 40);
+
+   // Запускаем музыку
+    playMusic();
     return true;
+}
+
+void Game::playMusic() {
+    if (!mixer_) return; // Если микшер не создан — выходим
+
+    // Загружаем аудиофайл 
+    musicAudio_ = MIX_LoadAudio(mixer_, "assets/music.ogg", false); // Загружаем аудиофайл
+    if (!musicAudio_) {
+        std::cerr << "Failed to load music.ogg" << std::endl;
+            return;
+    }
+
+    // Создаём трек (канал) для воспроизведения звука
+    musicTrack_ = MIX_CreateTrack(mixer_);
+    if (!musicTrack_) {
+        std::cerr << "Failed to create music track" << std::endl;
+        MIX_DestroyAudio(musicAudio_); // Если трек не создался — удаляем загруженный аудиофайл
+        musicAudio_ = nullptr;
+        return;
+    }
+
+    // Привязываем загруженный аудиофайл к треку
+    if (!MIX_SetTrackAudio(musicTrack_, musicAudio_)) {
+        std::cerr << "Failed to set track audio" << std::endl;
+        MIX_DestroyTrack(musicTrack_);
+        musicTrack_ = nullptr;
+        MIX_DestroyAudio(musicAudio_);
+        musicAudio_ = nullptr;
+        return;
+    }
+
+    // Настройка воспроизведения
+    SDL_PropertiesID props = SDL_CreateProperties(); // Создаём пустой набор свойств для передачи параметров воспроизведения
+    SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1); // Устанавливаем в свойствах параметр "количество повторов" в значение -1 (бесконечно)
+    bool ok = MIX_PlayTrack(musicTrack_, props); // Запускаем трек с переданными свойствами
+    SDL_DestroyProperties(props); // Освобождаем свойства, тк не нужны
+    if (!ok) { // Если трек не запустился
+        std::cerr << "Failed to play track" << std::endl;
+        MIX_DestroyTrack(musicTrack_);
+        musicTrack_ = nullptr;
+        MIX_DestroyAudio(musicAudio_);
+        musicAudio_ = nullptr;
+        return;
+    }
+
+    // Устанавливаем начальную громкость (50%)
+    setMusicVolume(menuHandler_->volumeLevel);
+}
+
+void Game::stopMusic() {
+    if (musicTrack_) { // Если трек существует
+        MIX_StopTrack(musicTrack_, 0); // Остановить воспроизведение (0 = без затухания)
+        MIX_DestroyTrack(musicTrack_); // Уничтожить трек, освободить ресурсы
+        musicTrack_ = nullptr;
+    }
+    if (musicAudio_) { // // Если аудиоданные загружены
+        MIX_DestroyAudio(musicAudio_);
+        musicAudio_ = nullptr;
+    }
+}
+
+void Game::setMusicVolume(float volume) {
+    if (!musicTrack_) return; //// Если трек не существует — выходим
+    // volume от 0.0 до 1.0, MIX_SetTrackGain принимает float, где 1.0 = норма, >1.0 громче
+    float gain = volume * 1.0f;  // Коэффициент усиления равен уровню громкости без доп умножения(1.0)
+    if (gain < 0.0f) gain = 0.0f; // Ограничиваем снизу
+    if (gain > 2.0f) gain = 2.0f; 
+    MIX_SetTrackGain(musicTrack_, gain); // Устанавливаем коэффициент усиления для трека
 }
 
 // Отрисовка текста
@@ -115,6 +240,17 @@ void Game::renderHelpText() {
         "Удачи и хорошей игры!";
 
     TextureManager::Instance().drawTextWrapped(helpText, "main_font", 50, 320, 650, textColor, renderer_); // Отрисовка текста с автоматическим переносом
+}
+
+void Game::renderVolumeSlider() {
+    // Обновляем позицию кружка
+    sliderHandle_.load("slider_handle", menuHandler_->sliderHandleX, menuHandler_->sliderY - 20, 40, 40);
+
+    // Рисуем полоску ползунка
+    sliderBg_.draw(renderer_);
+
+    // Рисуем кружок поверх
+    sliderHandle_.draw(renderer_);
 }
 
 // Уже непосредственно сама отрисовка
@@ -143,6 +279,11 @@ void Game::render() {
             // Отрисовка текста помощи
             renderHelpText();
         }
+        else if (menuHandler_->isSoundMode) { //Диалог звука
+            soundDialogBg_.draw(renderer_);
+            soundOkButton_.draw(renderer_);
+            renderVolumeSlider();
+        }
         else {
             // Рисуем кнопки меню
             playButton_.draw(renderer_);
@@ -161,6 +302,13 @@ void Game::render() {
             // Отрисовка текста помощи
             renderHelpText();
         }
+        else if (menuHandler_->isSoundMode) { // Диалог звука и в игре
+            soundDialogBg_.draw(renderer_);
+            soundOkButton_.draw(renderer_);
+
+            // Отрисовка ползунка
+            renderVolumeSlider();
+        }
     }
 
     SDL_RenderPresent(renderer_);
@@ -168,9 +316,17 @@ void Game::render() {
 
 void Game::update() {
     if (currentState_ == STATE_MENU) {
+        // Обновляем громкость музыки при изменении ползунка
+        if (menuHandler_->isSoundMode) {
+            setMusicVolume(menuHandler_->volumeLevel);
+        }
 
     }
     else if (currentState_ == STATE_GAME) {
+        // Обновляем громкость музыки при изменении ползунка
+        if (menuHandler_->isSoundMode) {
+            setMusicVolume(menuHandler_->volumeLevel);
+        }
     }
 }
 
@@ -205,6 +361,11 @@ void Game::handleEvents() {
                 menuHandler_->exitHelpMode();  // Закрываем диалог помощи
             }
         }
+        else if (menuHandler_->isSoundMode) {  // Режим звука 
+            if (menuHandler_->soundConfirmed) {
+                menuHandler_->exitSoundMode();  // Закрываем диалог звука
+            }
+        }
         else {
             // Обычный режим меню
             if (menuHandler_->playClicked) {
@@ -224,12 +385,28 @@ void Game::handleEvents() {
                 menuHandler_->exitHelpMode();  // Закрываем диалог помощи
             }
         }
+        else if (menuHandler_->isSoundMode) {  // Режим звука в игре 
+            if (menuHandler_->soundConfirmed) {
+                menuHandler_->exitSoundMode();  // Закрываем диалог звука
+            }
+        }
     }
-
 }
 
 void Game::clean() {
     std::cout << "Cleaning up..." << std::endl;
+
+    // Остановить и освободить всё, связанное с музыкой
+    stopMusic();
+
+    // Уничтожить микшер
+    if (mixer_) {
+        MIX_DestroyMixer(mixer_);
+        mixer_ = nullptr;
+    }
+
+    // Завершить работу SDL_mixer
+    MIX_Quit();
 
     // Очистка TTF 
     TextureManager::Instance().cleanupTTF();
@@ -240,5 +417,7 @@ void Game::clean() {
 
     SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
-    SDL_Quit();
+    if (sdlInitialized_) {
+        SDL_Quit();
+    }
 }
