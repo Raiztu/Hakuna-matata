@@ -1,43 +1,72 @@
-#pragma once
+п»ї#pragma once
 
 #include <SDL3/SDL.h>  
-
 #include "Vector2D.hpp"
 #include <iostream>  
 #include <vector>    
 
-// Перечисление кнопок мыши
-// SDL_BUTTON_LEFT - 1 вычитаем, чтобы получить индекс 0 для массива
 enum mouse_buttons {
-    LEFT = SDL_BUTTON_LEFT - 1,    // 0 - левая кнопка
-    MIDDLE = SDL_BUTTON_MIDDLE - 1, // 1 - средняя кнопка (колёсико)
-    RIGHT = SDL_BUTTON_RIGHT - 1,   // 2 - правая кнопка
-    BACK = SDL_BUTTON_X1 - 1,       // 3 - боковая кнопка "назад"
-    FORW = SDL_BUTTON_X2 - 1        // 4 - боковая кнопка "вперёд"
+    LEFT = SDL_BUTTON_LEFT - 1,
+    MIDDLE = SDL_BUTTON_MIDDLE - 1,
+    RIGHT = SDL_BUTTON_RIGHT - 1,
+    BACK = SDL_BUTTON_X1 - 1,
+    FORW = SDL_BUTTON_X2 - 1
 };
 
 class InputHandler {
 public:
-
     InputHandler();
     virtual ~InputHandler() { delete mousePosition_; }
 
-    // Основные методы обработки ввода (общие для всех состояний)
-    void handle(SDL_Event event);
-    Vector2D* getMousePosition();
-    bool getMouseButtonState(int buttonNumber);
-    bool isKeyDown(SDL_Scancode key);
+    void handle(SDL_Event event); // РћР±СЂР°Р±РѕС‚РєР° СЃРѕР±С‹С‚РёСЏ
+    Vector2D* getMousePosition(); // РљРѕРѕСЂРґРёРЅР°С‚С‹ РјС‹С€Рё
+    bool getMouseButtonState(int buttonNumber); // РџСЂРѕРІРµСЂРєР°, РЅР°Р¶Р°С‚Р° Р»Рё РєРЅРѕРїРєР° РјС‹С€Рё
+    bool isKeyDown(SDL_Scancode key); // РџСЂРѕРІРµСЂРєР°, РЅР°Р¶Р°С‚Р° Р»Рё РєР»Р°РІРёС€Р°
 
-    // Виртуальные методы для переопределения
-    virtual void onMouseButtonDown(SDL_Event event) {}
-    virtual void onMouseButtonUp(SDL_Event event) {}
-    virtual void onMouseMotion(SDL_Event event) {}
-    virtual void onKeyDown(SDL_Event event) {}
+    // Р’РёСЂС‚СѓР°Р»СЊРЅС‹Рµ РјРµС‚РѕРґС‹ РґР»СЏ РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅРёСЏ
+    virtual void onMouseButtonDown(SDL_Event event);
+    virtual void onMouseButtonUp(SDL_Event event);
+    virtual void onMouseMotion(SDL_Event event);
+    virtual void onKeyDown(SDL_Event event);
+
+    // РњРµС‚РѕРґС‹ РґР»СЏ РїСЂРѕРІРµСЂРєРё РєР»РёРєРѕРІ РЅР° РёРєРѕРЅРєРё Рё РІ СЌС‚РёС… РґРёР°Р»РѕРіР°С…
+    bool checkHelpIconClick(int x, int y);
+    bool checkSoundIconClick(int x, int y);
+    bool checkHelpDialogClick(int x, int y);
+    bool checkSoundDialogClick(int x, int y);
+
+    void updateSliderHandlePosition(); // РѕР±РЅРѕРІРёС‚СЊ РїРѕР·РёС†РёСЋ РєСЂСѓР¶РєР°
+
+    void resetCommonFlags();
+
+    void enterHelpMode(); // Р’С…РѕРґ РІ СЂРµР¶РёРј РїРѕРјРѕС‰Рё
+    void exitHelpMode(); // Р’С‹С…РѕРґ РёР· СЂРµР¶РёРјР° РїРѕРјРѕС‰Рё
+    void enterSoundMode(); // Р’С…РѕРґ РІ СЂРµР¶РёРј Р·РІСѓРєР°
+    void exitSoundMode(); // Р’С‹С…РѕРґ РёР· СЂРµР¶РёРјР° Р·РІСѓРєР°
+
+    // Р¤Р»Р°РіРё РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ, РІ РєР°РєРѕРј РјС‹ СЂРµР¶РёРјРµ (С‡С‚РѕР±С‹ РѕС‚СЂРёСЃРѕРІС‹РІР°С‚СЊ)
+    bool isHelpMode;
+    bool isSoundMode;
+    // Р”Р»СЏ РґРёР°Р»РѕРіР° РїРѕРјРѕС‰Рё СЃРѕРіР»Р°С€РµРЅРёСЏ (Р·Р°РєСЂС‹С‚СЊ РґРёР°Р»РѕРі)
+    bool helpConfirmed;
+    // Р”Р»СЏ РґРёР°Р»РѕРіР° Р·РІСѓРєР° (Р·Р°РєСЂС‹С‚СЊ РґРёР°Р»РѕРі)
+    bool soundConfirmed;
+
+    // РџРѕР·РёС†РёРё РїРѕР»Р·СѓРЅРєР° 
+    int sliderX, sliderY; // РєРѕРѕСЂРґРёРЅР°С‚С‹ РїРѕР»Р·СѓРЅРєР° (Р»РµРІР°СЏ С‚РѕС‡РєР°)
+    int sliderWidth; // С€РёСЂРёРЅР° РїРѕР»Р·СѓРЅРєР°
+    int sliderHandleX; // С‚РµРєСѓС‰Р°СЏ X РїРѕР·РёС†РёСЏ РєСЂСѓР¶РєР°
+
+    // Р”Р»СЏ РїРѕР»Р·СѓРЅРєР° РіСЂРѕРјРєРѕСЃС‚Рё
+    bool isDraggingSlider; // РїРµСЂРµС‚Р°СЃРєРёРІР°РµС‚СЃСЏ Р»Рё РєСЂСѓР¶РѕРє
+    float volumeLevel; // СѓСЂРѕРІРµРЅСЊ РіСЂРѕРјРєРѕСЃС‚Рё РѕС‚ 0.0 РґРѕ 1.0 
+
+    // Р”Р»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё Р·РІСѓРєР° РјРµР¶РґСѓ СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё
+    float getVolumeLevel() const;
+    void setVolumeLevel(float level);
 
 protected:
-
-    Vector2D* mousePosition_;         // Указатель на объект с позицией мыши
-    std::vector<bool> mouseStates_;  // Массив состояний кнопок мыши 
-    const bool* keystates_;           // Указатель на массив состояний клавиш от SDL
-
+    Vector2D* mousePosition_;
+    std::vector<bool> mouseStates_;
+    const bool* keystates_;
 };

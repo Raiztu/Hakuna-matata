@@ -3,7 +3,6 @@
 #include <SDL3/SDL_rect.h>
 #include <SDL3_image/SDL_image.h>
 
-
 #include <iostream>
 
 bool TextureManager::load(std::string fileName, std::string tag,

@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "InputHandler.hpp"
 
@@ -8,59 +8,25 @@ public:
     ~MenuInputHandler();
 
     virtual void onMouseButtonDown(SDL_Event event) override;
-    virtual void onMouseMotion(SDL_Event event) override;
-    virtual void onMouseButtonUp(SDL_Event event) override;
     virtual void onKeyDown(SDL_Event event) override;
 
-    // Метод для проверки клика по кнопкам 
+    // РњРµС‚РѕРґ РґР»СЏ РїСЂРѕРІРµСЂРєРё РєР»РёРєР° РїРѕ РєРЅРѕРїРєР°Рј 
     bool checkButtonClick(int x, int y);
-
-    // Метод для проверки кликов в диалоге выхода
+    // РњРµС‚РѕРґ РґР»СЏ РїСЂРѕРІРµСЂРєРё РєР»РёРєРѕРІ РІ РґРёР°Р»РѕРіРµ РІС‹С…РѕРґР°
     bool checkConfirmDialogClick(int x, int y);
 
-    // Метод для проверки кликов в диалоге помощи
-    bool checkHelpDialogClick(int x, int y);
-
-    // Метод для проверки кликов в диалоге звука
-    bool checkSoundDialogClick(int x, int y);
-
-    // Для главного меню
+    // Р”Р»СЏ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ
     bool playClicked;
     bool exitClicked;
 
-    // Для диалога выхода подтверждения (закрыть диалог)
-    bool confirmExitConfirmed;  // согласиться
-    bool confirmExitCancelled;  // остаться
+    // Р¤Р»Р°РіРё РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ, РІ РєР°РєРѕРј РјС‹ СЂРµР¶РёРјРµ (С‡С‚РѕР±С‹ РѕС‚СЂРёСЃРѕРІС‹РІР°С‚СЊ)
+    bool isConfirmMode; // true = РїРѕРєР°Р·С‹РІР°РµРј РґРёР°Р»РѕРі, false = РіР»Р°РІРЅРѕРµ РјРµРЅСЋ
 
-    // Для диалога помощи соглашения (закрыть диалог)
-    bool helpConfirmed;  
-
-    // Для диалога звука (закрыть диалог)
-    bool soundConfirmed;  
-
-    // Флаги для определения, в каком мы режиме (чтобы отрисовывать)
-    bool isConfirmMode;  // true = показываем диалог, false = главное меню
-    bool isHelpMode;     // true = показываем диалог помощи
-    bool isSoundMode;    // true = показываем диалог звука
-
-    // Для ползунка громкости
-    bool isDraggingSlider;  // перетаскивается ли кружок
-    float volumeLevel;      // уровень громкости от 0.0 до 1.0 
-
-    // Позиции ползунка 
-    int sliderX, sliderY;   // координаты ползунка (левая точка)
-    int sliderWidth;        // ширина ползунка
-    int sliderHandleX;      // текущая X позиция кружка
+    // Р”Р»СЏ РґРёР°Р»РѕРіР° РІС‹С…РѕРґР° РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ (Р·Р°РєСЂС‹С‚СЊ РґРёР°Р»РѕРі)
+    bool confirmExitConfirmed; // СЃРѕРіР»Р°СЃРёС‚СЊСЃСЏ
+    bool confirmExitCancelled; // РѕСЃС‚Р°С‚СЊСЃСЏ
 
     void resetFlags();
-    void enterConfirmMode();   // Вход в режим подтверждения
-    void exitConfirmMode();    // Выход из режима подтверждения
-
-    void enterHelpMode();      // Вход в режим помощи
-    void exitHelpMode();       // Выход из режима помощи
-
-    void enterSoundMode();     // Вход в режим звука
-    void exitSoundMode();      // Выход из режима звука
-
-    void updateSliderHandlePosition();  // обновить позицию кружка
+    void enterConfirmMode(); // Р’С…РѕРґ РІ СЂРµР¶РёРј РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
+    void exitConfirmMode(); // Р’С‹С…РѕРґ РёР· СЂРµР¶РёРјР° РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
 };
