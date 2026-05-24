@@ -6,7 +6,6 @@
 Game* g = 0;
 
 int main(int argv, char** argc) {
-    std::setlocale(LC_ALL, "Russian");
     setlocale(LC_ALL, "ru_RU.utf8");
     g = new Game();
     if (g->init("Test Game", 720, 960, SDL_WINDOW_RESIZABLE)) {

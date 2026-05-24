@@ -34,6 +34,7 @@ public:
     // Для работы с текстом
     bool loadFont(std::string fontPath, std::string fontTag, int fontSize);
     SDL_Texture* createTextTexture(const std::string& text, const std::string& fontTag, SDL_Color color, SDL_Renderer* renderer); // Создаёт текстуру из текста (временная операция)
+    float getCenteredX(const std::string& text, const std::string& fontTag, SDL_Color color, SDL_Renderer* renderer, float screenWidth); // Метод для центрировая слова и категории в гейме
     void drawText(const std::string& text, const std::string& fontTag, float x, float y, SDL_Color color, SDL_Renderer* renderer);  // Рисует однострочный текст на экране 
     void drawTextWrapped(const std::string& text, const std::string& fontTag, float x, float y, int wrapWidth, SDL_Color color, SDL_Renderer* renderer); // Рисует текст с автоматическим переносом строк
     

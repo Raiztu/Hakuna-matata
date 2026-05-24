@@ -3,10 +3,9 @@
 #include "MenuInputHandler.hpp"
 #include "TextureManager.hpp"
 
-#include <clocale>
 #include <iostream>
 
-Game::Game() : mixer_(nullptr), musicAudio_(nullptr), musicTrack_(nullptr) {  }
+Game::Game() : mixer_(nullptr), musicAudio_(nullptr), musicTrack_(nullptr) {}
 Game::~Game() { stopMusic(); }
 
 
@@ -57,7 +56,7 @@ bool Game::init(std::string title, int w, int h, int flags) {
         std::cerr << "Failed to load word list" << std::endl;
         return false;
     }
-
+ 
     maxWrongGuesses_ = 6;
     wrongGuesses_ = 0;
     startNewGame();
@@ -354,7 +353,7 @@ bool Game::loadWordList(const std::string& filename) {
 
     file.close();
     std::cout << "Total words loaded: " << wordList_.size() << std::endl;
-    return !wordList_.empty();
+    return !wordList_.empty(); 
 }
 
 void Game::startNewGame() {
@@ -438,9 +437,14 @@ void Game::checkLetterInWord(int letterIndex) {
 }
 
 void Game::renderWordProgress() {
+
+    const int SCREEN_WIDTH = 720;
+
     // Отрисовка категории
+    std::string categoryText = u8"Категория: " + currentCategory_;
     SDL_Color categoryColor = { 100, 100, 150, 255 };
-    TextureManager::Instance().drawText( "Category: " + currentCategory_, "main_font", 360, 550, categoryColor, renderer_);
+    float categoryX = TextureManager::Instance().getCenteredX(categoryText, "main_font", categoryColor, renderer_, SCREEN_WIDTH); // Берём правильный размер для центрирования
+    TextureManager::Instance().drawText(categoryText, "main_font", categoryX, 80, categoryColor, renderer_);
 
     // Формируем строку с угаданными буквами
     std::string displayWord = "";
@@ -457,12 +461,8 @@ void Game::renderWordProgress() {
     }
 
     SDL_Color wordColor = { 0, 0, 0, 255 };
-    TextureManager::Instance().drawText(displayWord, "main_font", 360, 600, wordColor, renderer_);
-
-    // Отрисовка счётчика ошибок
-    std::string errorsText = "Errors: " + std::to_string(wrongGuesses_) + "/" + std::to_string(maxWrongGuesses_);
-    SDL_Color errorColor = { 200, 0, 0, 255 };
-    TextureManager::Instance().drawText(errorsText, "main_font", 360, 650, errorColor, renderer_);
+    float wordX = TextureManager::Instance().getCenteredX(displayWord, "main_font", wordColor, renderer_, SCREEN_WIDTH); // Центрируем слово
+    TextureManager::Instance().drawText(displayWord, "main_font", wordX, 625, wordColor, renderer_);
 }
 
 // Уже непосредственно сама отрисовка

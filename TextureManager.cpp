@@ -62,7 +62,7 @@ void TextureManager::drawFrame(std::string tag, float x, float y, float width,
 
 // Для работы с текстом
 bool TextureManager::loadFont(std::string fontPath, std::string fontTag, int fontSize) {
-    TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
+TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
     if (font == nullptr) {
         std::cerr << "Failed to load font" << std::endl;
         return false;
@@ -74,8 +74,7 @@ bool TextureManager::loadFont(std::string fontPath, std::string fontTag, int fon
     return true;
 }
 
-SDL_Texture* TextureManager::createTextTexture(const std::string& text, const std::string& fontTag,
-    SDL_Color color, SDL_Renderer* renderer) {
+SDL_Texture* TextureManager::createTextTexture(const std::string& text, const std::string& fontTag, SDL_Color color, SDL_Renderer* renderer) {
     TTF_Font* font = defaultFont_; //запасной вариант
     if (fontMap_.find(fontTag) != fontMap_.end()) { 
         font = fontMap_[fontTag]; // меняем, если нашли
@@ -98,8 +97,24 @@ SDL_Texture* TextureManager::createTextTexture(const std::string& text, const st
     return texture;
 }
 
-void TextureManager::drawText(const std::string& text, const std::string& fontTag,
-    float x, float y, SDL_Color color, SDL_Renderer* renderer) {
+float TextureManager::getCenteredX(const std::string& text, const std::string& fontTag, SDL_Color color, SDL_Renderer* renderer, float screenWidth) {
+    if (text.empty()) {
+        return screenWidth / 2; // центр экрана для пустого текста
+    }
+
+    SDL_Texture* tempTexture = createTextTexture(text, fontTag, color, renderer);
+    if (tempTexture == nullptr) {
+        return screenWidth / 2; // если не удалось создать, возвращаем центр
+    }
+
+    float texW, texH;
+    SDL_GetTextureSize(tempTexture, &texW, &texH);
+    SDL_DestroyTexture(tempTexture);
+
+    return (screenWidth - texW) / 2;
+}
+
+void TextureManager::drawText(const std::string& text, const std::string& fontTag, float x, float y, SDL_Color color, SDL_Renderer* renderer) {
     SDL_Texture* textTexture = createTextTexture(text, fontTag, color, renderer);
     if (textTexture != nullptr) {
         float texW, texH;
@@ -116,9 +131,7 @@ void TextureManager::drawText(const std::string& text, const std::string& fontTa
     }
 }
 
-void TextureManager::drawTextWrapped(const std::string& text, const std::string& fontTag,
-    float x, float y, int wrapWidth, SDL_Color color,
-    SDL_Renderer* renderer) {
+void TextureManager::drawTextWrapped(const std::string& text, const std::string& fontTag, float x, float y, int wrapWidth, SDL_Color color, SDL_Renderer* renderer) {
     TTF_Font* font = defaultFont_;
     if (fontMap_.find(fontTag) != fontMap_.end()) {
         font = fontMap_[fontTag];
