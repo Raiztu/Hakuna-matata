@@ -35,7 +35,7 @@ bool Game::init(std::string title, int w, int h, int flags) {
 
     // Инициализация SDL_mixer 
     if (!MIX_Init()) {
-        std::cerr << "MIX_Init failed" << std::endl; // Если ошибка - сообщаем и прерываем запуск
+        std::cerr << "MIX_Init failed" << std::endl; // Если ошибка - сообщаем 
         return false;
     }
 
@@ -153,6 +153,43 @@ bool Game::init(std::string title, int w, int h, int flags) {
 
     }
 
+    // Загрузка текстур для диалогов выигрыша/проигрыша
+    if (!TextureManager::Instance().load("assets/win_bg.png", "win_bg", renderer_)) {
+        std::cerr << "Warning: win_bg.png not loaded" << std::endl;
+    }
+
+    if (!TextureManager::Instance().load("assets/lose_bg.png", "lose_bg", renderer_)) {
+        std::cerr << "Warning: lose_bg.png not loaded" << std::endl;
+    }
+
+    if (!TextureManager::Instance().load("assets/new_game_button.png", "new_game_btn", renderer_)) {
+        std::cerr << "Warning: new_game_button.png not loaded" << std::endl;
+    }
+
+    if (!TextureManager::Instance().load("assets/to_menu_button.png", "to_menu_btn", renderer_)) {
+        std::cerr << "Warning: to_menu_button.png not loaded" << std::endl;
+    }
+
+    // Элементы виселицы
+    if (!TextureManager::Instance().load("assets/hangman_head.png", "hangman_head", renderer_)) {
+        std::cerr << "Warning: hangman_head.png not loaded" << std::endl;
+    }
+    if (!TextureManager::Instance().load("assets/hangman_body.png", "hangman_body", renderer_)) {
+        std::cerr << "Warning: hangman_body.png not loaded" << std::endl;
+    }
+    if (!TextureManager::Instance().load("assets/hangman_right_arm.png", "hangman_right_arm", renderer_)) {
+        std::cerr << "Warning: hangman_right_arm.png not loaded" << std::endl;
+    }
+    if (!TextureManager::Instance().load("assets/hangman_left_arm.png", "hangman_left_arm", renderer_)) {
+        std::cerr << "Warning: hangman_left_arm.png not loaded" << std::endl;
+    }
+    if (!TextureManager::Instance().load("assets/hangman_right_leg.png", "hangman_right_leg", renderer_)) {
+        std::cerr << "Warning: hangman_right_leg.png not loaded" << std::endl;
+    }
+    if (!TextureManager::Instance().load("assets/hangman_left_leg.png", "hangman_left_leg", renderer_)) {
+        std::cerr << "Warning: hangman_left_leg.png not loaded" << std::endl;
+    }
+
     // Настраиваем
     playButton_.load("play_btn", 198, 653, 325, 80);
     exitButton_.load("exit_btn", 198, 765, 325, 80);
@@ -166,10 +203,16 @@ bool Game::init(std::string title, int w, int h, int flags) {
 
     /////////////////////////////////// Для помощи
     helpDialogBg_.load("help_bg", 35, 305, 650, 350);
-    IseeButton_.load("Isee_btn", 300, 545, 120, 80);
+    IseeButton_.load("Isee_btn", 300, 545, 130, 80);
 
-    // Иконка возврата с игры на меню
+    ////////////////////////////////// Иконка возврата с игры на меню
     backToMenuIcon_.load("back_icon", 20, 890, 50, 50);
+
+    ////////////////////////////////// Диалоги выиграша и проигрыша
+    winDialogBg_.load("win_bg", 35, 305, 650, 350);
+    loseDialogBg_.load("lose_bg", 35, 305, 650, 350);
+    newGameButton_.load("new_game_btn", 190, 545, 120, 80);
+    menuButton_.load("to_menu_btn", 410, 545, 120, 80);
 
     ////////////////////////////////// Для звука
     soundDialogBg_.load("sound_bg", 35, 305, 650, 350);
@@ -257,12 +300,47 @@ void Game::renderHelpText() {
     std::string helpText =
         u8"   КАК ИГРАТЬ В ВИСЕЛИЦУ   \n\n"
         "1. Компьютер загадывает слово\n"
-        "2. Пытайтесь угадать буквы по одной\n"
+        "2. Пытайся угадать буквы по одной\n"
         "3. Каждая ошибка рисует часть виселицы\n"
-        "4. Угадайте все буквы до того, как виселица будет построена!\n\n"
+        "4. Угадай все буквы до того, как вся виселица будет построена!\n\n"
         "Удачи и хорошей игры!";
 
     TextureManager::Instance().drawTextWrapped(helpText, "main_font", 50, 320, 650, textColor, renderer_); // Отрисовка текста с автоматическим переносом
+}
+
+// Отрисовка текста диалогов выигрыша и поражения
+void Game::renderWinDialogText() {
+    SDL_Color textColor = { 0, 0, 0, 0 };
+
+    // Разбиваем текст на отдельные строки
+    std::string line1 = u8"Молодец!";
+    std::string line2 = u8"Ты угадал слово!";
+    std::string line3 = u8"Слово: " + currentWord_;
+
+    // Центрируем каждую строку по горизонтали
+    float textX1 = 35 + TextureManager::Instance().getCenteredX(line1, "main_font", textColor, renderer_, 650);
+    float textX2 = 35 + TextureManager::Instance().getCenteredX(line2, "main_font", textColor, renderer_, 650);
+    float textX3 = 35 + TextureManager::Instance().getCenteredX(line3, "main_font", textColor, renderer_, 650);
+
+    // Отрисовываем каждую строку отдельно с центрированием
+    TextureManager::Instance().drawText(line1, "main_font", textX1, 330, textColor, renderer_); // по 30 взяли высоту строки :)
+    TextureManager::Instance().drawText(line2, "main_font", textX2, 360, textColor, renderer_);
+    TextureManager::Instance().drawText(line3, "main_font", textX3, 390, textColor, renderer_);
+}
+
+void Game::renderLoseDialogText() {
+    SDL_Color textColor = { 0, 0, 0, 255 };
+
+    std::string line1 = u8"Ты проиграл :(";
+    std::string line2 = u8"Загаданное слово: " + currentWord_;;
+
+    // Центрируем по горизонтали внутри диалога
+    float textX1 = 35 + TextureManager::Instance().getCenteredX(line1, "main_font", textColor, renderer_, 650);
+    float textX2 = 35 + TextureManager::Instance().getCenteredX(line2, "main_font", textColor, renderer_, 650);
+
+    // Отрисовываем каждую строку отдельно с центрированием
+    TextureManager::Instance().drawText(line1, "main_font", textX1, 330, textColor, renderer_); // по 30 взяли высоту строки :)
+    TextureManager::Instance().drawText(line2, "main_font", textX2, 360, textColor, renderer_);
 }
 
 void Game::renderVolumeSlider() {
@@ -425,14 +503,41 @@ void Game::checkLetterInWord(int letterIndex) {
 
     if (won) {
         std::cout << "YOU WIN! Word was: " << currentWord_ << std::endl;
-        startNewGame();
+        gameHandler_->enterWinDialog();  // Показываем диалог победы
         return;
     }
 
     // Проверка поражения
     if (wrongGuesses_ >= maxWrongGuesses_) {
         std::cout << "GAME OVER! Word was: " << currentWord_ << std::endl;
-        startNewGame();
+        gameHandler_->enterLoseDialog();  // Показываем диалог поражения
+    }
+}
+
+void Game::renderHangman() {
+    // Отрисовываем элементы по порядку в зависимости от количества ошибок
+    if (wrongGuesses_ >= 1) {
+        TextureManager::Instance().draw("hangman_head", 0, 0, 720, 960, renderer_);
+    }
+    
+    if (wrongGuesses_ >= 2) {
+        TextureManager::Instance().draw("hangman_body", 0, 0, 720, 960, renderer_);
+    }
+    
+    if (wrongGuesses_ >= 3) {
+        TextureManager::Instance().draw("hangman_left_arm", 0, 0, 720, 960, renderer_);
+    }
+    
+    if (wrongGuesses_ >= 4) {
+        TextureManager::Instance().draw("hangman_right_arm", 0, 0, 720, 960, renderer_);
+    }
+    
+    if (wrongGuesses_ >= 5) {
+        TextureManager::Instance().draw("hangman_right_leg", 0, 0, 720, 960, renderer_);
+    }
+    
+    if (wrongGuesses_ >= 6) {
+        TextureManager::Instance().draw("hangman_left_leg", 0, 0, 720, 960, renderer_);
     }
 }
 
@@ -504,6 +609,10 @@ void Game::render() {
     }
     else if (currentState_ == STATE_GAME) {
         TextureManager::Instance().draw("game_bg", 0, 0, 720, 960, renderer_);
+
+        // Отрисовка виселицы
+        renderHangman();
+
         volumeIcon_.draw(renderer_);
         helpIcon_.draw(renderer_);
         backToMenuIcon_.draw(renderer_);
@@ -512,14 +621,32 @@ void Game::render() {
         renderWordProgress();
         renderKeyboard();
 
+        if (gameHandler_->isWinDialogMode) {  // Диалог выигрыша
+            winDialogBg_.draw(renderer_);
+            newGameButton_.draw(renderer_);
+            menuButton_.draw(renderer_);
 
-        if (gameHandler_->isHelpMode) {  // Диалог помощи
+            // Отрисовка текста выигрыша
+            renderWinDialogText();
+        }
+
+        else if (gameHandler_->isLoseDialogMode) {  // Диалог проигрыша
+            loseDialogBg_.draw(renderer_);
+            newGameButton_.draw(renderer_);
+            menuButton_.draw(renderer_);
+
+            // Отрисовка текста проигрыша
+            renderLoseDialogText();
+        }
+
+        else if (gameHandler_->isHelpMode) {  // Диалог помощи
             helpDialogBg_.draw(renderer_);
             IseeButton_.draw(renderer_);
 
             // Отрисовка текста помощи
             renderHelpText();
         }
+
         else if (gameHandler_->isSoundMode) { // Диалог звука и в игре
             soundDialogBg_.draw(renderer_);
             soundOkButton_.draw(renderer_);
@@ -555,14 +682,62 @@ void Game::handleEvents() {
                 menuHandler_->handle(event);
             }
             else if (currentState_ == STATE_GAME && gameHandler_) {
-                gameHandler_->handle(event);
+                gameHandler_->handle(event); // передаём событие в gameHandler для обработки кликов
 
-                // Проверяем, не нажата ли кнопка возврата в меню
+                // обрабатываем диалоги после обработки событий
+                // Обработка диалога победы
+                if (gameHandler_->isWinDialogMode) {
+                    if (gameHandler_->newGameFromWin) {
+                        std::cout << "Starting new game from win dialog" << std::endl;
+                        gameHandler_->exitWinDialog();
+                        gameHandler_->resetDialogFlags();
+                        startNewGame();
+                        gameHandler_->clearLastPressedLetter();
+                    }
+                    else if (gameHandler_->backToMenuFromWin) {
+                        std::cout << "Returning to menu from win dialog" << std::endl;
+                        gameHandler_->exitWinDialog();
+                        gameHandler_->resetDialogFlags();
+                        gameHandler_->resetGameFlags();
+                        menuHandler_->setVolumeLevel(gameHandler_->getVolumeLevel());
+                        startNewGame();
+                        gameHandler_->clearLastPressedLetter();
+                        currentState_ = STATE_MENU;
+                    }
+                    // Если диалог активен, но кнопки не нажаты - пропускаем остальную обработку
+                    continue;
+                }
+
+                // Обработка диалога поражения
+                if (gameHandler_->isLoseDialogMode) {
+                    if (gameHandler_->newGameFromLose) {
+                        std::cout << "Starting new game from lose dialog" << std::endl;
+                        gameHandler_->exitLoseDialog();
+                        gameHandler_->resetDialogFlags();
+                        startNewGame();
+                        gameHandler_->clearLastPressedLetter();
+                    }
+                    else if (gameHandler_->backToMenuFromLose) {
+                        std::cout << "Returning to menu from lose dialog" << std::endl;
+                        gameHandler_->exitLoseDialog();
+                        gameHandler_->resetDialogFlags();
+                        gameHandler_->resetGameFlags();
+                        menuHandler_->setVolumeLevel(gameHandler_->getVolumeLevel());
+                        startNewGame();
+                        gameHandler_->clearLastPressedLetter();
+                        currentState_ = STATE_MENU;
+                    }
+                    // Если диалог активен, но кнопки не нажаты - пропускаем остальную обработку
+                    continue;
+                }
+
+                // Теперь обрабатывается всё остальное
+                // Проверка возврата в меню
                 if (gameHandler_->backToMenuClicked) {
                     std::cout << "Returning to main menu from game" << std::endl;
                     menuHandler_->setVolumeLevel(gameHandler_->getVolumeLevel());  // Копируем громкость из игры в меню
                     currentState_ = STATE_MENU;
-                    gameHandler_->resetGameFlags();  // Сбрасываем флаг
+                    gameHandler_->resetGameFlags();  // Сбрасываем флаги
 
                     // Сбрасываем состояние игры для следующего запуска
                     if (gameHandler_) {
@@ -603,7 +778,6 @@ void Game::handleEvents() {
             }
         }
         else {
-            // Обычный режим меню
             if (menuHandler_->playClicked) {
                 std::cout << "Play button clicked! Switching to game..." << std::endl;
                 gameHandler_->setVolumeLevel(menuHandler_->getVolumeLevel());  // Копируем громкость из меню в игру

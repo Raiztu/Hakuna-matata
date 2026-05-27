@@ -122,7 +122,7 @@ bool InputHandler::checkSoundIconClick(int x, int y) {
 }
 
 bool InputHandler::checkHelpDialogClick(int x, int y) {
-    float IseeLeft = 260, IseeRight = 460;
+    float IseeLeft = 300, IseeRight = 430;
     float IseeTop = 545, IseeBottom = 625;
 
     if (x >= IseeLeft && x <= IseeRight && y >= IseeTop && y <= IseeBottom) {

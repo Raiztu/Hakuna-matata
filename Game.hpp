@@ -6,13 +6,12 @@
 #include "GameObject.hpp"
 #include "InputHandler.hpp"
 #include "MenuInputHandler.hpp"
-#include "Player.hpp"
 #include "GameInputHandler.hpp"
 
 #include <string>
 #include <vector>
 #include <fstream>
-#include <ctime>     // для srand
+#include <ctime> // для srand
 
 enum GameState {
     STATE_MENU,
@@ -74,7 +73,17 @@ private:
     GameObject sliderBg_;       
     GameObject sliderHandle_;
 
+    // Для состояния игры непосредственно
     GameObject backToMenuIcon_; 
+
+    GameObject winDialogBg_;
+    GameObject loseDialogBg_;
+    GameObject newGameButton_;   
+    GameObject menuButton_;     
+
+    // Отрисовка текста диалогов выигрыша/проигрыша
+    void renderWinDialogText();   // Текст для диалога победы
+    void renderLoseDialogText();  // Текст для диалога поражения
 
     // Mетод для отрисовки текста помощи
     void renderHelpText();
@@ -106,4 +115,7 @@ private:
 
     // Метод для отрисовки буквенной клавиатуры
     void renderKeyboard();
+
+    // Метод для отрисовки виселицы
+    void renderHangman();
 };

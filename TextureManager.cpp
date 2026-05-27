@@ -177,7 +177,7 @@ bool TextureManager::initTTF() {
 void TextureManager::cleanupTTF() {
     for (auto& pair : fontMap_) {
         if (pair.second != nullptr) {
-            TTF_CloseFont(pair.second); // Очищает память, закрывает файл шрифта и теперь pair.second недействительный
+            TTF_CloseFont(pair.second); // Очищает память, закрывает файл шрифта, и теперь pair.second недействительный
         }
     }
     fontMap_.clear(); // Удаляет все элементы из map

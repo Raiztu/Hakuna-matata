@@ -1,7 +1,7 @@
 ﻿#include "GameInputHandler.hpp"
 #include <iostream>
 
-GameInputHandler::GameInputHandler() : lastPressedLetter_(-1), backToMenuClicked(false)
+GameInputHandler::GameInputHandler() : lastPressedLetter_(-1), backToMenuClicked(false), isWinDialogMode(false), isLoseDialogMode(false), newGameFromWin(false), backToMenuFromWin(false), newGameFromLose(false), backToMenuFromLose(false)
 {
     letters_ = {
         u8"Й", u8"Ц", u8"У", u8"К", u8"Е", u8"Н", u8"Г", u8"Ш", u8"Щ", u8"З", u8"Х", u8"Ъ",
@@ -96,6 +96,17 @@ void GameInputHandler::onMouseButtonDown(SDL_Event event) {
         int mouseX = event.button.x; // Координаты клика
         int mouseY = event.button.y;
 
+        // Сначала проверяем диалоги выигрыша/проигрыша, чтобы остальное в них не работало
+        if (isWinDialogMode) {
+            checkWinDialogClick(mouseX, mouseY);
+            return; // не обрабатываем другие клики, пока активен диалог
+        }
+
+        if (isLoseDialogMode) {
+            checkLoseDialogClick(mouseX, mouseY);
+            return; // не обрабатываем другие клики, пока активен диалог
+        }
+
         // Проверяем иконки
         if (checkHelpIconClick(mouseX, mouseY)) {
             return;
@@ -168,4 +179,87 @@ void GameInputHandler::checkBackButtonClick(int x, int y) {
         backToMenuClicked = true;
         std::cout << "Back to menu button clicked" << std::endl;
     }
+}
+
+void GameInputHandler::enterWinDialog() {
+    isWinDialogMode = true;
+    isHelpMode = false;
+    isSoundMode = false;
+    newGameFromWin = false;
+    backToMenuFromWin = false;
+}
+
+void GameInputHandler::exitWinDialog() {
+    isWinDialogMode = false;
+    newGameFromWin = false;
+    backToMenuFromWin = false;
+}
+
+void GameInputHandler::enterLoseDialog() {
+    isLoseDialogMode = true;
+    isHelpMode = false;
+    isSoundMode = false;
+    newGameFromLose = false;
+    backToMenuFromLose = false;
+}
+
+void GameInputHandler::exitLoseDialog() {
+    isLoseDialogMode = false;
+    newGameFromLose = false;
+    backToMenuFromLose = false;
+}
+
+void GameInputHandler::resetDialogFlags() {
+    newGameFromWin = false;
+    backToMenuFromWin = false;
+    newGameFromLose = false;
+    backToMenuFromLose = false;
+};
+
+bool GameInputHandler::checkWinDialogClick(int x, int y) {
+    // Координаты кнопки "Новая игра" 
+    float newGameLeft = 190, newGameRight = 310;
+    float newGameTop = 545, newGameBottom = 625;
+
+    // Координаты кнопки "В меню" 
+    float menuLeft = 410, menuRight = 530;
+    float menuTop = 545, menuBottom = 625;
+
+    if (x >= newGameLeft && x <= newGameRight && y >= newGameTop && y <= newGameBottom) {
+        newGameFromWin = true;
+        std::cout << "New game button clicked in win dialog" << std::endl;
+        return true;
+    }
+
+    if (x >= menuLeft && x <= menuRight && y >= menuTop && y <= menuBottom) {
+        backToMenuFromWin = true;
+        std::cout << "Menu button clicked in win dialog" << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
+bool GameInputHandler::checkLoseDialogClick(int x, int y) {
+    // Координаты кнопки "Новая игра" 
+    float newGameLeft = 190, newGameRight = 310;
+    float newGameTop = 545, newGameBottom = 625;
+
+    // Координаты кнопки "В меню" 
+    float menuLeft = 410, menuRight = 530;
+    float menuTop = 545, menuBottom = 625;
+
+    if (x >= newGameLeft && x <= newGameRight && y >= newGameTop && y <= newGameBottom) {
+        newGameFromLose = true;
+        std::cout << "New game button clicked in lose dialog" << std::endl;
+        return true;
+    }
+
+    if (x >= menuLeft && x <= menuRight && y >= menuTop && y <= menuBottom) {
+        backToMenuFromLose = true;
+        std::cout << "Menu button clicked in lose dialog" << std::endl;
+        return true;
+    }
+
+    return false;
 }

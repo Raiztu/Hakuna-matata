@@ -42,6 +42,25 @@ public:
     void checkBackButtonClick(int x, int y); // Метод для проверки клика по кнопке возврата
     void resetGameFlags() { backToMenuClicked = false; } // Метод для сброса флагов
     
+    // Всё для диалогов выигрыша и проигрыша
+    bool isWinDialogMode;      // Режим диалога победы
+    bool isLoseDialogMode;     // Режим диалога поражения
+    bool newGameFromWin;       // Новая игра из диалога победы
+    bool backToMenuFromWin;    // Возврат в меню из диалога победы
+    bool newGameFromLose;      // Новая игра из диалога поражения
+    bool backToMenuFromLose;   // Возврат в меню из диалога поражения
+
+    // Методы для управления диалогами
+    void enterWinDialog();
+    void exitWinDialog();
+    void enterLoseDialog();
+    void exitLoseDialog();
+    void resetDialogFlags();
+
+    // Проверка кликов в диалогах
+    bool checkWinDialogClick(int x, int y);
+    bool checkLoseDialogClick(int x, int y);
+
 private:
     int lastPressedLetter_;
     std::vector<std::string> letters_; // Все буквы алфавита
