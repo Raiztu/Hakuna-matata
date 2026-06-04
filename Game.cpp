@@ -25,21 +25,17 @@ bool Game::init(std::string title, int w, int h, int flags) {
     }
     std::cout << "renderer created" << std::endl;
 
-    // Инициализация SDL для работы с аудио
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
-        // Если инициализация не удалась - выводим ошибку и прерываем запуск
         std::cerr << "SDL could not initialize! SDL Error" << std::endl;
         return false;
     }
-    sdlInitialized_ = true; // SDL успешно инициализирована
+    sdlInitialized_ = true; 
 
-    // Инициализация SDL_mixer 
     if (!MIX_Init()) {
-        std::cerr << "MIX_Init failed" << std::endl; // Если ошибка - сообщаем 
+        std::cerr << "MIX_Init failed" << std::endl;
         return false;
     }
 
-    // Создаём микшер, привязанный к устройству воспроизведения по умолчанию
     mixer_ = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
     if (!mixer_) {
         std::cerr << "MIX_CreateMixerDevice failed" << std::endl;
@@ -51,7 +47,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
     gameHandler_ = new GameInputHandler();
     currentHandler_ = menuHandler_;
 
-    // Загружаем список слов
     if (!loadWordList("assets/wordlist.txt")) {
         std::cerr << "Failed to load word list" << std::endl;
         return false;
@@ -61,18 +56,14 @@ bool Game::init(std::string title, int w, int h, int flags) {
     wrongGuesses_ = 0;
     startNewGame();
 
-    // По тексту
-    // Инициализация 
     if (!TextureManager::Instance().initTTF()) {
         return false;
     }
 
-    // Загрузка шрифта
     if (!TextureManager::Instance().loadFont("assets/anime-ace-v3.ttf", "main_font", 21)) {
-        std::cerr << "Failed to load main font" << std::endl; // Продолжаем работу, но текст не будет отображаться 
+        std::cerr << "Failed to load main font" << std::endl; 
     }
 
-    // Загрузка текстур
     if (!TextureManager::Instance().load("assets/menu_bg.png", "menu_bg", renderer_)) {
         std::cerr << "Failed to load menu background" << std::endl;
     }
@@ -96,7 +87,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
         std::cerr << "Failed to load hepl button" << std::endl;
         return false;
     }
-    //////////////////////////////////////////// Для выхода
     if (!TextureManager::Instance().load("assets/confirm_bg.png", "confirm_bg", renderer_)) {
         std::cerr << "Warning: confirm_bg.png not loaded" << std::endl;
     }
@@ -108,7 +98,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
     if (!TextureManager::Instance().load("assets/no_button.png", "cancel_btn", renderer_)) {
         std::cerr << "Warning: no_btn.png not loaded" << std::endl;
     }
-    //////////////////////////////////////////// Для помощи
     if (!TextureManager::Instance().load("assets/help_bg.png", "help_bg", renderer_)) {
         std::cerr << "Warning: help_bg.png not loaded" << std::endl;
     }
@@ -117,7 +106,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
         std::cerr << "Warning: Isee_btn.png not loaded" << std::endl;
     }
 
-    //////////////////////////////////////////// Для звука
     if (!TextureManager::Instance().load("assets/sound_bg.png", "sound_bg", renderer_)) {
         std::cerr << "Warning: sound_bg.png not loaded" << std::endl;
         return false;
@@ -128,7 +116,7 @@ bool Game::init(std::string title, int w, int h, int flags) {
         return false;
     }
 
-    if (!TextureManager::Instance().load("assets/slider_bg.png", "slider_bg", renderer_)) { // Для ползунка
+    if (!TextureManager::Instance().load("assets/slider_bg.png", "slider_bg", renderer_)) { 
         std::cerr << "Warning: slider_bg.png not loaded" << std::endl;
         return false;
     }
@@ -138,12 +126,10 @@ bool Game::init(std::string title, int w, int h, int flags) {
         return false;
     }
 
-    ///////////////////////////////////////////////////////// Игра сама
     if (!TextureManager::Instance().load("assets/game_bg.png", "game_bg", renderer_)) {
         std::cerr << "Failed to load game background" << std::endl;
     }
 
-    // Загрузка того же шрифта для выведенной клавиатуры
     if (!TextureManager::Instance().loadFont("assets/anime-ace-v3.ttf", "keyboard_font", 28)) {
         std::cerr << "Warning: keyboard font not loaded" << std::endl;
     }
@@ -153,7 +139,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
 
     }
 
-    // Загрузка текстур для диалогов выигрыша/проигрыша
     if (!TextureManager::Instance().load("assets/win_bg.png", "win_bg", renderer_)) {
         std::cerr << "Warning: win_bg.png not loaded" << std::endl;
     }
@@ -170,7 +155,6 @@ bool Game::init(std::string title, int w, int h, int flags) {
         std::cerr << "Warning: to_menu_button.png not loaded" << std::endl;
     }
 
-    // Элементы виселицы
     if (!TextureManager::Instance().load("assets/hangman_head.png", "hangman_head", renderer_)) {
         std::cerr << "Warning: hangman_head.png not loaded" << std::endl;
     }
@@ -190,61 +174,51 @@ bool Game::init(std::string title, int w, int h, int flags) {
         std::cerr << "Warning: hangman_left_leg.png not loaded" << std::endl;
     }
 
-    // Настраиваем
     playButton_.load("play_btn", 198, 653, 325, 80);
     exitButton_.load("exit_btn", 198, 765, 325, 80);
     volumeIcon_.load("volume_icon", 578, 30, 112, 112);
     helpIcon_.load("help_icon", 30, 30, 112, 112);
 
-    /////////////////////////////////// Для выхода
     confirmDialogBg_.load("confirm_bg", 35, 305, 650, 350);
     confirmButton_.load("confirm_btn", 190, 545, 120, 80);
     cancelButton_.load("cancel_btn", 410, 545, 120, 80);
 
-    /////////////////////////////////// Для помощи
     helpDialogBg_.load("help_bg", 35, 305, 650, 350);
     IseeButton_.load("Isee_btn", 300, 545, 130, 80);
 
-    ////////////////////////////////// Иконка возврата с игры на меню
     backToMenuIcon_.load("back_icon", 20, 890, 50, 50);
 
-    ////////////////////////////////// Диалоги выиграша и проигрыша
     winDialogBg_.load("win_bg", 35, 305, 650, 350);
     loseDialogBg_.load("lose_bg", 35, 305, 650, 350);
     newGameButton_.load("new_game_btn", 190, 545, 120, 80);
     menuButton_.load("to_menu_btn", 410, 545, 120, 80);
 
-    ////////////////////////////////// Для звука
     soundDialogBg_.load("sound_bg", 35, 305, 650, 350);
     soundOkButton_.load("sound_btn", 300, 545, 120, 80);
-    sliderBg_.load("slider_bg", menuHandler_->sliderX, menuHandler_->sliderY - 10, 400, 20); // X-координата левого края полоски, Y-координата верхнего края полоски 
+    sliderBg_.load("slider_bg", menuHandler_->sliderX, menuHandler_->sliderY - 10, 400, 20); 
     sliderHandle_.load("slider_handle", menuHandler_->sliderHandleX, menuHandler_->sliderY - 20, 40, 40);
 
-    // Запускаем музыку
     playMusic();
     return true;
 }
 
 void Game::playMusic() {
-    if (!mixer_) return; // Если микшер не создан — выходим
-
-    // Загружаем аудиофайл 
+    if (!mixer_) return; 
+ 
     musicAudio_ = MIX_LoadAudio(mixer_, "assets/music.ogg", false); 
     if (!musicAudio_) {
         std::cerr << "Failed to load music.ogg" << std::endl;
         return;
     }
 
-    // Создаём трек (канал) для воспроизведения звука
     musicTrack_ = MIX_CreateTrack(mixer_);
     if (!musicTrack_) {
         std::cerr << "Failed to create music track" << std::endl;
-        MIX_DestroyAudio(musicAudio_); // Если трек не создался — удаляем загруженный аудиофайл
+        MIX_DestroyAudio(musicAudio_); 
         musicAudio_ = nullptr;
         return;
     }
 
-    // Привязываем загруженный аудиофайл к треку
     if (!MIX_SetTrackAudio(musicTrack_, musicAudio_)) {
         std::cerr << "Failed to set track audio" << std::endl;
         MIX_DestroyTrack(musicTrack_);
@@ -254,12 +228,11 @@ void Game::playMusic() {
         return;
     }
 
-    // Настройка воспроизведения
-    SDL_PropertiesID props = SDL_CreateProperties(); // Создаём пустой набор свойств для передачи параметров воспроизведения
-    SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1); // Устанавливаем в свойствах параметр "количество повторов" в значение -1 (бесконечно)
-    bool ok = MIX_PlayTrack(musicTrack_, props); // Запускаем трек с переданными свойствами
-    SDL_DestroyProperties(props); // Освобождаем свойства, так как не нужны
-    if (!ok) { // Если трек не запустился
+    SDL_PropertiesID props = SDL_CreateProperties(); 
+    SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
+    bool ok = MIX_PlayTrack(musicTrack_, props);
+    SDL_DestroyProperties(props); 
+    if (!ok) {
         std::cerr << "Failed to play track" << std::endl;
         MIX_DestroyTrack(musicTrack_);
         musicTrack_ = nullptr;
@@ -268,32 +241,29 @@ void Game::playMusic() {
         return;
     }
 
-    // Устанавливаем начальную громкость (50%)
     setMusicVolume(menuHandler_->volumeLevel);
 }
 
 void Game::stopMusic() {
-    if (musicTrack_) { // Если трек существует
-        MIX_StopTrack(musicTrack_, 0); // Остановить воспроизведение (0 = без затухания)
-        MIX_DestroyTrack(musicTrack_); // Уничтожить трек, освободить ресурсы
+    if (musicTrack_) { 
+        MIX_StopTrack(musicTrack_, 0); 
+        MIX_DestroyTrack(musicTrack_); 
         musicTrack_ = nullptr;
     }
-    if (musicAudio_) { // // Если аудиоданные загружены
+    if (musicAudio_) {
         MIX_DestroyAudio(musicAudio_);
         musicAudio_ = nullptr;
     }
 }
 
 void Game::setMusicVolume(float volume) {
-    if (!musicTrack_) return; //// Если трек не существует — выходим
-    // volume от 0.0 до 1.0, MIX_SetTrackGain принимает float, где 1.0 = норма, >1.0 громче
-    float gain = volume * 1.0f;  // Коэффициент усиления равен уровню громкости без доп умножения(1.0)
-    if (gain < 0.0f) gain = 0.0f; // Ограничиваем снизу
+    if (!musicTrack_) return; 
+    float gain = volume * 1.0f;  
+    if (gain < 0.0f) gain = 0.0f; 
     if (gain > 2.0f) gain = 2.0f;
-    MIX_SetTrackGain(musicTrack_, gain); // Устанавливаем коэффициент усиления для трека
+    MIX_SetTrackGain(musicTrack_, gain); 
 }
 
-// Отрисовка текста
 void Game::renderHelpText() {
     SDL_Color textColor = { 0, 0, 0, 0 };
 
@@ -305,46 +275,33 @@ void Game::renderHelpText() {
         "4. Угадай все буквы до того, как вся виселица будет построена!\n\n"
         "Удачи и хорошей игры!";
 
-    TextureManager::Instance().drawTextWrapped(helpText, "main_font", 50, 320, 650, textColor, renderer_); // Отрисовка текста с автоматическим переносом
+    TextureManager::Instance().drawTextWrapped(helpText, "main_font", 50, 320, 650, textColor, renderer_); 
 }
 
-// Отрисовка текста диалогов выигрыша и поражения
 void Game::renderWinDialogText() {
     SDL_Color textColor = { 0, 0, 0, 0 };
-
-    // Разбиваем текст на отдельные строки
     std::string line1 = u8"Молодец!";
     std::string line2 = u8"Ты угадал слово!";
     std::string line3 = u8"Слово: " + currentWord_;
-
-    // Центрируем каждую строку по горизонтали
     float textX1 = 35 + TextureManager::Instance().getCenteredX(line1, "main_font", textColor, renderer_, 650);
     float textX2 = 35 + TextureManager::Instance().getCenteredX(line2, "main_font", textColor, renderer_, 650);
     float textX3 = 35 + TextureManager::Instance().getCenteredX(line3, "main_font", textColor, renderer_, 650);
-
-    // Отрисовываем каждую строку отдельно с центрированием
-    TextureManager::Instance().drawText(line1, "main_font", textX1, 330, textColor, renderer_); // по 30 взяли высоту строки :)
+    TextureManager::Instance().drawText(line1, "main_font", textX1, 330, textColor, renderer_);
     TextureManager::Instance().drawText(line2, "main_font", textX2, 360, textColor, renderer_);
     TextureManager::Instance().drawText(line3, "main_font", textX3, 390, textColor, renderer_);
 }
 
 void Game::renderLoseDialogText() {
     SDL_Color textColor = { 0, 0, 0, 255 };
-
     std::string line1 = u8"Ты проиграл :(";
     std::string line2 = u8"Загаданное слово: " + currentWord_;;
-
-    // Центрируем по горизонтали внутри диалога
     float textX1 = 35 + TextureManager::Instance().getCenteredX(line1, "main_font", textColor, renderer_, 650);
     float textX2 = 35 + TextureManager::Instance().getCenteredX(line2, "main_font", textColor, renderer_, 650);
-
-    // Отрисовываем каждую строку отдельно с центрированием
-    TextureManager::Instance().drawText(line1, "main_font", textX1, 330, textColor, renderer_); // по 30 взяли высоту строки :)
+    TextureManager::Instance().drawText(line1, "main_font", textX1, 330, textColor, renderer_); 
     TextureManager::Instance().drawText(line2, "main_font", textX2, 360, textColor, renderer_);
 }
 
 void Game::renderVolumeSlider() {
-    // Обновляем позицию кружка из правильного handler'а
     if (currentState_ == STATE_MENU && menuHandler_) {
         sliderBg_.load("slider_bg", menuHandler_->sliderX, menuHandler_->sliderY - 10, 400, 20);
         sliderHandle_.load("slider_handle", menuHandler_->sliderHandleX, menuHandler_->sliderY - 20, 40, 40);
@@ -354,54 +311,42 @@ void Game::renderVolumeSlider() {
         sliderHandle_.load("slider_handle", gameHandler_->sliderHandleX, gameHandler_->sliderY - 20, 40, 40);
     }
 
-    // Рисуем полоску ползунка
     sliderBg_.draw(renderer_);
 
-    // Рисуем кружок поверх
     sliderHandle_.draw(renderer_);
 }
 
-// Рендер выведенной клавиатуры
 void Game::renderKeyboard() {
     if (currentState_ != STATE_GAME) return;
-
-    // Определяем цвета
-    SDL_Color normalColor = { 70, 70, 100, 255 };     // фон (в ненажатом состоянии)
-    SDL_Color pressedColor = { 100, 100, 100, 255 }; // фон для нажатых
+    SDL_Color normalColor = { 70, 70, 100, 255 };    
+    SDL_Color pressedColor = { 100, 100, 100, 255 }; 
     SDL_Color textNormalColor = { 0, 0, 0, 0 };
-    SDL_Color textPressedColor = { 150, 150, 150, 255 }; // текст для нажатых
+    SDL_Color textPressedColor = { 150, 150, 150, 255 }; 
 
     for (int i = 0; i < gameHandler_->getLetterCount(); i++) {
         float x, y, w, h;
-        gameHandler_->getLetterRect(i, x, y, w, h); // определение кнопки этой буквы
+        gameHandler_->getLetterRect(i, x, y, w, h);
 
-        // Рисуем фон кнопки
-        SDL_FRect bgRect = { x, y, w, h };  // создаём прямоугольник
+        SDL_FRect bgRect = { x, y, w, h };  
 
         if (gameHandler_->isLetterGuessed(i)) {
-            // Буква уже нажата - серый фон
             SDL_SetRenderDrawColor(renderer_, pressedColor.r, pressedColor.g, pressedColor.b, pressedColor.a);
         }
         else {
-            // Буква не нажата - тёмно-серый фон
             SDL_SetRenderDrawColor(renderer_, normalColor.r, normalColor.g, normalColor.b, normalColor.a);
         }
-        SDL_RenderFillRect(renderer_, &bgRect); // заливаем прямоугольник цветом
+        SDL_RenderFillRect(renderer_, &bgRect); 
 
-        // Рисуем рамку кнопки
         SDL_SetRenderDrawColor(renderer_, 200, 200, 200, 255);
         SDL_RenderRect(renderer_, &bgRect); 
 
-        // Рисуем текст буквы
         SDL_Color textColor;
         if (gameHandler_->isLetterGuessed(i)) {
-            textColor = textPressedColor;  // текст для нажатых
+            textColor = textPressedColor;  
         }
         else {
-            textColor = textNormalColor;   // текст для активных (ещё не нажатых)
+            textColor = textNormalColor; 
         }
-
-        // Центрируем букву внутри кнопки
         float textX = x + (w - 28) / 2;
         float textY = y + (h - 28) / 2;
 
@@ -410,17 +355,16 @@ void Game::renderKeyboard() {
 }
 
 bool Game::loadWordList(const std::string& filename) {
-    std::ifstream file(filename); // создание объекта для чтения файла
+    std::ifstream file(filename); 
     if (!file.is_open()) {
         std::cerr << "Failed to open wordlist.txt" << std::endl;
         return false;
     }
 
-    wordList_.clear(); // очищаем старый список 
+    wordList_.clear(); 
     std::string line;
 
-    while (std::getline(file, line)) { // читаем по строке файл
-        // Ищем пробел между словом и категорией
+    while (std::getline(file, line)) { 
         size_t spacePos = line.find(' ');
         if (spacePos != std::string::npos) {
             std::string word = line.substr(0, spacePos);
@@ -440,42 +384,36 @@ void Game::startNewGame() {
         return;
     }
 
-    // Выбираем случайное слово
-    srand(time(nullptr)); // инициализируем генератор случайных чисел текущим временем
-    int randomIndex = rand() % wordList_.size(); // остаток от деления рандомного числа на размер списка
+    srand(time(nullptr));
+    int randomIndex = rand() % wordList_.size();
     currentWord_ = wordList_[randomIndex].first;
     currentCategory_ = wordList_[randomIndex].second;
 
-    size_t wordLength = currentWord_.length() / 2;  // Количество букв (для русских букв)
+    size_t wordLength = currentWord_.length() / 2; 
 
     std::cout << "--- NEW GAME ---" << std::endl;
     std::cout << "Word: '" << currentWord_ << "'" << std::endl;
     std::cout << "Category: '" << currentCategory_ << "'" << std::endl;
     std::cout << "Word length: " << wordLength << " letters" << std::endl;
 
-    // Сбрасываем прогресс 
     wordProgress_.clear();
-    wordProgress_.resize(wordLength, false); // Изменяем размер вектора до wordLength элементов и заполняем их значениями false
+    wordProgress_.resize(wordLength, false); 
 
-    // Сбрасываем ошибки
     wrongGuesses_ = 0;
 
-    // Сбрасываем клавиатуру
     if (gameHandler_) {
-        gameHandler_->resetLetters(); // очищаем все нажатые буквы
+        gameHandler_->resetLetters(); 
     }
 }
 
 void Game::checkLetterInWord(int letterIndex) {
-    std::string letter = gameHandler_->getLetter(letterIndex); // получаем нажатую букву
-    bool found = false; // флаг, была ли найдена в слове
+    std::string letter = gameHandler_->getLetter(letterIndex); 
+    bool found = false; 
 
-    size_t wordLength = currentWord_.length() / 2;  // Количество букв
+    size_t wordLength = currentWord_.length() / 2; 
 
-    // Проверяем все позиции в слове 
     for (size_t i = 0; i < wordLength; i++) {
-        // Берём 2 байта начиная с позиции i*2
-        std::string wordLetter = currentWord_.substr(i * 2, 2); // смотрим на два байта с позиции i*2
+        std::string wordLetter = currentWord_.substr(i * 2, 2);
 
         if (wordLetter == letter && !wordProgress_[i]) {
             wordProgress_[i] = true;
@@ -492,7 +430,6 @@ void Game::checkLetterInWord(int letterIndex) {
         std::cout << "Correct!" << std::endl;
     }
 
-    // Проверка победы
     bool won = true;
     for (bool b : wordProgress_) {
         if (!b) {
@@ -503,19 +440,17 @@ void Game::checkLetterInWord(int letterIndex) {
 
     if (won) {
         std::cout << "YOU WIN! Word was: " << currentWord_ << std::endl;
-        gameHandler_->enterWinDialog();  // Показываем диалог победы
+        gameHandler_->enterWinDialog(); 
         return;
     }
 
-    // Проверка поражения
     if (wrongGuesses_ >= maxWrongGuesses_) {
         std::cout << "GAME OVER! Word was: " << currentWord_ << std::endl;
-        gameHandler_->enterLoseDialog();  // Показываем диалог поражения
+        gameHandler_->enterLoseDialog();  
     }
 }
 
 void Game::renderHangman() {
-    // Отрисовываем элементы по порядку в зависимости от количества ошибок
     if (wrongGuesses_ >= 1) {
         TextureManager::Instance().draw("hangman_head", 0, 0, 720, 960, renderer_);
     }
@@ -545,19 +480,17 @@ void Game::renderWordProgress() {
 
     const int SCREEN_WIDTH = 720;
 
-    // Отрисовка категории
     std::string categoryText = u8"Категория: " + currentCategory_;
     SDL_Color categoryColor = { 100, 100, 150, 255 };
-    float categoryX = TextureManager::Instance().getCenteredX(categoryText, "main_font", categoryColor, renderer_, SCREEN_WIDTH); // Берём правильный размер для центрирования
+    float categoryX = TextureManager::Instance().getCenteredX(categoryText, "main_font", categoryColor, renderer_, SCREEN_WIDTH); 
     TextureManager::Instance().drawText(categoryText, "main_font", categoryX, 80, categoryColor, renderer_);
 
-    // Формируем строку с угаданными буквами
     std::string displayWord = "";
-    size_t wordLength = currentWord_.length() / 2;  // Количество букв
+    size_t wordLength = currentWord_.length() / 2; 
 
     for (size_t i = 0; i < wordLength; i++) {
-        if (wordProgress_[i]) { // буква угадана
-            displayWord += currentWord_.substr(i * 2, 2); // Берём 2 байта начиная с позиции i*2
+        if (wordProgress_[i]) { 
+            displayWord += currentWord_.substr(i * 2, 2);
             displayWord += " ";
         }
         else {
@@ -566,43 +499,37 @@ void Game::renderWordProgress() {
     }
 
     SDL_Color wordColor = { 0, 0, 0, 255 };
-    float wordX = TextureManager::Instance().getCenteredX(displayWord, "main_font", wordColor, renderer_, SCREEN_WIDTH); // Центрируем слово
+    float wordX = TextureManager::Instance().getCenteredX(displayWord, "main_font", wordColor, renderer_, SCREEN_WIDTH);
     TextureManager::Instance().drawText(displayWord, "main_font", wordX, 625, wordColor, renderer_);
 }
 
-// Уже непосредственно сама отрисовка
 void Game::render() {
-    // Очищаем экран
     SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
     SDL_RenderClear(renderer_);
 
-    // Рисуем в зависимости от состояния
     if (currentState_ == STATE_MENU) {
         TextureManager::Instance().draw("menu_bg", 0, 0, 720, 960, renderer_);
         volumeIcon_.draw(renderer_);
         helpIcon_.draw(renderer_);
 
         if (menuHandler_->isConfirmMode) {
-            // Диалог выхода
             confirmDialogBg_.draw(renderer_);
             confirmButton_.draw(renderer_);
             cancelButton_.draw(renderer_);
 
         }
-        else if (menuHandler_->isHelpMode) {  // Диалог помощи
+        else if (menuHandler_->isHelpMode) {  
             helpDialogBg_.draw(renderer_);
             IseeButton_.draw(renderer_);
 
-            // Отрисовка текста помощи
             renderHelpText();
         }
-        else if (menuHandler_->isSoundMode) { //Диалог звука
+        else if (menuHandler_->isSoundMode) { 
             soundDialogBg_.draw(renderer_);
             soundOkButton_.draw(renderer_);
             renderVolumeSlider();
         }
         else {
-            // Рисуем кнопки меню
             playButton_.draw(renderer_);
             exitButton_.draw(renderer_);
         }
@@ -610,48 +537,42 @@ void Game::render() {
     else if (currentState_ == STATE_GAME) {
         TextureManager::Instance().draw("game_bg", 0, 0, 720, 960, renderer_);
 
-        // Отрисовка виселицы
         renderHangman();
 
         volumeIcon_.draw(renderer_);
         helpIcon_.draw(renderer_);
         backToMenuIcon_.draw(renderer_);
 
-        // Отрисовка прогресса слова и клавиатуры
         renderWordProgress();
         renderKeyboard();
 
-        if (gameHandler_->isWinDialogMode) {  // Диалог выигрыша
+        if (gameHandler_->isWinDialogMode) { 
             winDialogBg_.draw(renderer_);
             newGameButton_.draw(renderer_);
             menuButton_.draw(renderer_);
 
-            // Отрисовка текста выигрыша
             renderWinDialogText();
         }
 
-        else if (gameHandler_->isLoseDialogMode) {  // Диалог проигрыша
+        else if (gameHandler_->isLoseDialogMode) { 
             loseDialogBg_.draw(renderer_);
             newGameButton_.draw(renderer_);
             menuButton_.draw(renderer_);
 
-            // Отрисовка текста проигрыша
             renderLoseDialogText();
         }
 
-        else if (gameHandler_->isHelpMode) {  // Диалог помощи
+        else if (gameHandler_->isHelpMode) { 
             helpDialogBg_.draw(renderer_);
             IseeButton_.draw(renderer_);
 
-            // Отрисовка текста помощи
             renderHelpText();
         }
 
-        else if (gameHandler_->isSoundMode) { // Диалог звука и в игре
+        else if (gameHandler_->isSoundMode) { 
             soundDialogBg_.draw(renderer_);
             soundOkButton_.draw(renderer_);
 
-            // Отрисовка ползунка
             renderVolumeSlider();
         }
     }
@@ -660,12 +581,11 @@ void Game::render() {
 }
 
 void Game::update() {
-    // Применяем громкость из активного handler'а
     if (currentState_ == STATE_MENU && menuHandler_) {
-        setMusicVolume(menuHandler_->getVolumeLevel());  // Используем геттер
+        setMusicVolume(menuHandler_->getVolumeLevel());  
     }
     else if (currentState_ == STATE_GAME && gameHandler_) {
-        setMusicVolume(gameHandler_->getVolumeLevel());  // Используем геттер
+        setMusicVolume(gameHandler_->getVolumeLevel()); 
     }
 }
 
@@ -682,10 +602,8 @@ void Game::handleEvents() {
                 menuHandler_->handle(event);
             }
             else if (currentState_ == STATE_GAME && gameHandler_) {
-                gameHandler_->handle(event); // передаём событие в gameHandler для обработки кликов
+                gameHandler_->handle(event); 
 
-                // обрабатываем диалоги после обработки событий
-                // Обработка диалога победы
                 if (gameHandler_->isWinDialogMode) {
                     if (gameHandler_->newGameFromWin) {
                         std::cout << "Starting new game from win dialog" << std::endl;
@@ -704,11 +622,9 @@ void Game::handleEvents() {
                         gameHandler_->clearLastPressedLetter();
                         currentState_ = STATE_MENU;
                     }
-                    // Если диалог активен, но кнопки не нажаты - пропускаем остальную обработку
                     continue;
                 }
 
-                // Обработка диалога поражения
                 if (gameHandler_->isLoseDialogMode) {
                     if (gameHandler_->newGameFromLose) {
                         std::cout << "Starting new game from lose dialog" << std::endl;
@@ -727,27 +643,22 @@ void Game::handleEvents() {
                         gameHandler_->clearLastPressedLetter();
                         currentState_ = STATE_MENU;
                     }
-                    // Если диалог активен, но кнопки не нажаты - пропускаем остальную обработку
                     continue;
                 }
 
-                // Теперь обрабатывается всё остальное
-                // Проверка возврата в меню
                 if (gameHandler_->backToMenuClicked) {
                     std::cout << "Returning to main menu from game" << std::endl;
-                    menuHandler_->setVolumeLevel(gameHandler_->getVolumeLevel());  // Копируем громкость из игры в меню
+                    menuHandler_->setVolumeLevel(gameHandler_->getVolumeLevel());  
                     currentState_ = STATE_MENU;
-                    gameHandler_->resetGameFlags();  // Сбрасываем флаги
+                    gameHandler_->resetGameFlags(); 
 
-                    // Сбрасываем состояние игры для следующего запуска
                     if (gameHandler_) {
                         gameHandler_->resetLetters();
                         gameHandler_->clearLastPressedLetter();
                     }
-                    continue;  // Пропускаем обработку букв
+                    continue; 
                 }
 
-                // Проверяем только последнюю нажатую букву
                 int pressedLetter = gameHandler_->getLastPressedLetter();
                 if (pressedLetter != -1) {
                     checkLetterInWord(pressedLetter);
@@ -759,28 +670,27 @@ void Game::handleEvents() {
 
     if (currentState_ == STATE_MENU && menuHandler_) {
         if (menuHandler_->isConfirmMode) {
-            // В режиме подтверждения
             if (menuHandler_->confirmExitConfirmed) {
-                stopGame();  // Выходим
+                stopGame();  
             }
             if (menuHandler_->confirmExitCancelled) {
-                menuHandler_->exitConfirmMode();  // Возвращаемся в меню
+                menuHandler_->exitConfirmMode();  
             }
         }
-        else if (menuHandler_->isHelpMode) {  // Режим помощи
+        else if (menuHandler_->isHelpMode) {  
             if (menuHandler_->helpConfirmed) {
-                menuHandler_->exitHelpMode();  // Закрываем диалог помощи
+                menuHandler_->exitHelpMode();
             }
         }
-        else if (menuHandler_->isSoundMode) {  // Режим звука 
+        else if (menuHandler_->isSoundMode) { 
             if (menuHandler_->soundConfirmed) {
-                menuHandler_->exitSoundMode();  // Закрываем диалог звука
+                menuHandler_->exitSoundMode();  
             }
         }
         else {
             if (menuHandler_->playClicked) {
                 std::cout << "Play button clicked! Switching to game..." << std::endl;
-                gameHandler_->setVolumeLevel(menuHandler_->getVolumeLevel());  // Копируем громкость из меню в игру
+                gameHandler_->setVolumeLevel(menuHandler_->getVolumeLevel()); 
                 currentState_ = STATE_GAME;
                 menuHandler_->resetFlags();
             }
@@ -791,7 +701,6 @@ void Game::handleEvents() {
         }
     }
     else if (currentState_ == STATE_GAME && gameHandler_) {
-        // Обработка диалогов в игре
         if (gameHandler_->isHelpMode) {
             if (gameHandler_->helpConfirmed) {
                 gameHandler_->exitHelpMode();
@@ -808,19 +717,15 @@ void Game::handleEvents() {
 void Game::clean() {
     std::cout << "Cleaning up..." << std::endl;
 
-    // Остановить и освободить всё, связанное с музыкой
     stopMusic();
 
-    // Уничтожить микшер
     if (mixer_) {
         MIX_DestroyMixer(mixer_);
         mixer_ = nullptr;
     }
 
-    // Завершить работу SDL_mixer
     MIX_Quit();
 
-    // Очистка TTF 
     TextureManager::Instance().cleanupTTF();
 
     delete menuHandler_;

@@ -9,28 +9,23 @@ GameInputHandler::GameInputHandler() : lastPressedLetter_(-1), backToMenuClicked
         u8"Я", u8"Ч", u8"С", u8"М", u8"И", u8"Т", u8"Ь", u8"Б", u8"Ю"
     };
 
-    // Инициализация состояний
     for (size_t i = 0; i < letters_.size(); i++) {
         letterStates_.push_back(false);
     }
 
-    // Параметры клавиатуры
-    const float buttonWidth = 54.0f; // Ширина одной кнопки с буквой 
-    const float buttonHeight = 58.0f; // Высота одной кнопки 
-    const float gap = 5.0f; // Расстояние между кнопками 
-    const float screenWidth = 720.0f; // Ширина самого экрана 
+    const float buttonWidth = 54.0f; 
+    const float buttonHeight = 58.0f; 
+    const float gap = 5.0f; 
+    const float screenWidth = 720.0f; 
 
-    // Ряд 1: 12 клавиш
-    float row1_width = 12 * buttonWidth + 11 * gap; // Общая ширина первого ряда
-    float row1_startX = (screenWidth - row1_width) / 2; // Начальная X координата для центрирования ряда 
-    float y1 = 700;  // Y координата первого ряда
+    float row1_width = 12 * buttonWidth + 11 * gap;
+    float row1_startX = (screenWidth - row1_width) / 2;
+    float y1 = 700;  
 
-    // Добавляем прямоугольник кнопки (для каждой)
     for (int i = 0; i < 12; i++) {
         addLetterRect(row1_startX + i * (buttonWidth + gap), y1, buttonWidth, buttonHeight);
     }
 
-    // Ряд 2: 11 клавиш - просто центрируем
     float row2_width = 11 * buttonWidth + 10 * gap;
     float row2_startX = (screenWidth - row2_width) / 2;
     float y2 = y1 + buttonHeight + gap;
@@ -39,7 +34,6 @@ GameInputHandler::GameInputHandler() : lastPressedLetter_(-1), backToMenuClicked
         addLetterRect(row2_startX + i * (buttonWidth + gap), y2, buttonWidth, buttonHeight);
     }
 
-    // Ряд 3: 9 клавиш - просто центрируем
     float row3_width = 9 * buttonWidth + 8 * gap;
     float row3_startX = (screenWidth - row3_width) / 2;
     float y3 = y2 + buttonHeight + gap;
@@ -49,7 +43,6 @@ GameInputHandler::GameInputHandler() : lastPressedLetter_(-1), backToMenuClicked
     }
 }
 
-// Метод для добавления прямоугольника
 void GameInputHandler::addLetterRect(float x, float y, float w, float h) {
     SDL_FRect rect;
     rect.x = x;
@@ -61,7 +54,7 @@ void GameInputHandler::addLetterRect(float x, float y, float w, float h) {
 
 GameInputHandler::~GameInputHandler() {}
 
-bool GameInputHandler::checkLetterClick(int x, int y, int& letterIndex) { //Инициализируется в Down как -1
+bool GameInputHandler::checkLetterClick(int x, int y, int& letterIndex) { 
     for (size_t i = 0; i < letterRects_.size(); i++) {
         if (x >= letterRects_[i].x && x <= letterRects_[i].x + letterRects_[i].w && y >= letterRects_[i].y && y <= letterRects_[i].y + letterRects_[i].h) {
             letterIndex = i;
@@ -85,29 +78,26 @@ void GameInputHandler::resetLetters() {
         letterStates_[i] = false;
     }
     lastPressedLetter_ = -1;
-    backToMenuClicked = false; // Сбрасываем флаг при новой игре
+    backToMenuClicked = false; 
 }
 
 void GameInputHandler::onMouseButtonDown(SDL_Event event) {
-    // Вызываем базовую обработку
-    InputHandler::onMouseButtonDown(event); // Просто отмечаем, что левая кнопка мышки нажата
+    InputHandler::onMouseButtonDown(event);
 
     if (event.button.button == SDL_BUTTON_LEFT) {
-        int mouseX = event.button.x; // Координаты клика
+        int mouseX = event.button.x;
         int mouseY = event.button.y;
 
-        // Сначала проверяем диалоги выигрыша/проигрыша, чтобы остальное в них не работало
         if (isWinDialogMode) {
             checkWinDialogClick(mouseX, mouseY);
-            return; // не обрабатываем другие клики, пока активен диалог
+            return; 
         }
 
         if (isLoseDialogMode) {
             checkLoseDialogClick(mouseX, mouseY);
-            return; // не обрабатываем другие клики, пока активен диалог
+            return;
         }
 
-        // Проверяем иконки
         if (checkHelpIconClick(mouseX, mouseY)) {
             return;
         }
@@ -116,7 +106,6 @@ void GameInputHandler::onMouseButtonDown(SDL_Event event) {
             return;
         }
 
-        // Проверяем режимы
         if (isSoundMode) {
             int handleSize = 40;
             int handleLeft = sliderHandleX;
@@ -138,13 +127,12 @@ void GameInputHandler::onMouseButtonDown(SDL_Event event) {
         else {
             checkBackButtonClick(mouseX, mouseY);
 
-            // Если нажата не кнопка возврата, проверяем буквы
             if (!backToMenuClicked) {
-                int letterIndex = -1; // Создаём переменную для индекса буквы
+                int letterIndex = -1; 
                 if (checkLetterClick(mouseX, mouseY, letterIndex)) {
-                    if (!letterStates_[letterIndex]) { // Проверяем, не была ли эта буква уже нажата ранее
-                        letterStates_[letterIndex] = true; // Отмечаем букву как нажатую
-                        lastPressedLetter_ = letterIndex; // Запоминаем последнюю нажатую букву
+                    if (!letterStates_[letterIndex]) { 
+                        letterStates_[letterIndex] = true; 
+                        lastPressedLetter_ = letterIndex; 
                         std::cout << "Letter clicked: " << letters_[letterIndex] << std::endl;
                     }
                 }
@@ -169,7 +157,6 @@ void GameInputHandler::onKeyDown(SDL_Event event) {
     }
 }
 
-// Кликабельность возврата
 void GameInputHandler::checkBackButtonClick(int x, int y) {
     const float backButtonX = 20; const float backButtonY = 890;
     const float backButtonW = 50; const float backButtonH = 50;
@@ -217,11 +204,9 @@ void GameInputHandler::resetDialogFlags() {
 };
 
 bool GameInputHandler::checkWinDialogClick(int x, int y) {
-    // Координаты кнопки "Новая игра" 
     float newGameLeft = 190, newGameRight = 310;
     float newGameTop = 545, newGameBottom = 625;
 
-    // Координаты кнопки "В меню" 
     float menuLeft = 410, menuRight = 530;
     float menuTop = 545, menuBottom = 625;
 
@@ -241,11 +226,9 @@ bool GameInputHandler::checkWinDialogClick(int x, int y) {
 }
 
 bool GameInputHandler::checkLoseDialogClick(int x, int y) {
-    // Координаты кнопки "Новая игра" 
     float newGameLeft = 190, newGameRight = 310;
     float newGameTop = 545, newGameBottom = 625;
 
-    // Координаты кнопки "В меню" 
     float menuLeft = 410, menuRight = 530;
     float menuTop = 545, menuBottom = 625;
 

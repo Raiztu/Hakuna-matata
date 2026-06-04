@@ -11,46 +11,47 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <ctime> // для srand
+#include <ctime> 
 
+/// @brief Состояния игры: меню или активная игра
 enum GameState {
-    STATE_MENU,
-    STATE_GAME
+    STATE_MENU, ///< Главное меню
+    STATE_GAME ///< Режим игры
 };
 
-class Game {
+/// @brief Главный класс игры. Управляет окном, рендерером, обработчиками ввода, музыкой и логикой
+class Game { 
 public:
     Game();
     ~Game();
+    /// @brief Инициализирует игру: окно, рендерер, загрузку текстур и слов, музыку
     bool init(std::string, int, int, int);
-    void render();
-    void update();
-    void handleEvents();
-    void clean();
-    void startGame() { running_ = true; }
-    void stopGame() { running_ = false; }
-    bool isRunning() { return running_; }
-    void playMusic();
-    void stopMusic();
-    void setMusicVolume(float volume);
+    void render(); ///< Отрисовывает всё: меню, игровой фон, виселицу, клавиатуру, диалоги
+    void update(); ///< Обновляет логику (например, применяет громкость)
+    void handleEvents(); ///< Обрабатывает все события SDL (ввод, закрытие окна)
+    void clean(); ///< Освобождает ресурсы: музыку, обработчики, окно, SDL
+    void startGame() { running_ = true; } ///< Запускает главный цикл
+    void stopGame() { running_ = false; } ///< Останавливает главный цикл
+    bool isRunning() { return running_; } ///< Возвращает true, пока игра работает
+    void playMusic(); ///< Загружает и запускает фоновую музыку (бесконечный цикл)
+    void stopMusic(); ///< Останавливает и освобождает музыку
+    void setMusicVolume(float volume); ///< Устанавливает громкость музыки (0..1)
 
 private:
-    bool running_ = false;
-    bool sdlInitialized_ = false;
-    GameState currentState_ = STATE_MENU;
+    bool running_ = false; ///< Флаг работы главного цикла
+    bool sdlInitialized_ = false; ///< Флаг успешной инициализации SDL
+    GameState currentState_ = STATE_MENU; ///< Текущее состояние: меню или игра
+     
+    SDL_Window* window_; ///< Окно SDL
+    SDL_Renderer* renderer_; ///< Рендерер SDL
 
-    SDL_Window* window_;
-    SDL_Renderer* renderer_;
+    GameInputHandler* gameHandler_; ///< Обработчик ввода в игре
+    MenuInputHandler* menuHandler_; ///< Обработчик ввода в меню
+    InputHandler* currentHandler_; ///< Текущий активный обработчик
 
-    // Обработчики ввода
-    GameInputHandler* gameHandler_; 
-    MenuInputHandler* menuHandler_;
-    InputHandler* currentHandler_;
-
-    // Для музыки
-    MIX_Mixer* mixer_;         // Микшер 
-    MIX_Audio* musicAudio_;    // Загруженный аудиофайл
-    MIX_Track* musicTrack_;    // Трек для воспроизведения
+    MIX_Mixer* mixer_;         ///< Микшер SDL_mixer
+    MIX_Audio* musicAudio_;    ///< Загруженный аудиофайл
+    MIX_Track* musicTrack_;    ///< Трек для воспроизведения
 
 
     GameObject playButton_;
@@ -73,49 +74,35 @@ private:
     GameObject sliderBg_;       
     GameObject sliderHandle_;
 
-    // Для состояния игры непосредственно
-    GameObject backToMenuIcon_; 
+    GameObject backToMenuIcon_;  ///< Иконка возврата в меню
+    GameObject winDialogBg_; ///< Фон диалога победы
+    GameObject loseDialogBg_; ///< Фон диалога поражения
+    GameObject newGameButton_; ///< Кнопка "Новая игра"
+    GameObject menuButton_; ///< Кнопка "В меню"    
 
-    GameObject winDialogBg_;
-    GameObject loseDialogBg_;
-    GameObject newGameButton_;   
-    GameObject menuButton_;     
+    void renderWinDialogText();   ///< Текст для диалога победы
+    void renderLoseDialogText();  ///< Текст для диалога поражения
 
-    // Отрисовка текста диалогов выигрыша/проигрыша
-    void renderWinDialogText();   // Текст для диалога победы
-    void renderLoseDialogText();  // Текст для диалога поражения
+    void renderHelpText(); ///< Текст для диалога помощи
 
-    // Mетод для отрисовки текста помощи
-    void renderHelpText();
-
-    // Метод для отрисовки ползунка
-    void renderVolumeSlider();
+    void renderVolumeSlider(); ///< Отрисовка ползунка громкости
 
 
-    ///// Работа со словом
-    std::string currentCategory_;  // Категория текущего слова
-    int wrongGuesses_;              // Количество ошибок
-    int maxWrongGuesses_;           // Максимум ошибок (6)
-    std::vector<std::pair<std::string, std::string>> wordList_;  // Список всех слов из файла
+    std::string currentCategory_; ///< Категория текущего слова
+    int wrongGuesses_; ///< Текущее количество ошибок
+    int maxWrongGuesses_; ///< Максимум ошибок (6)
+    std::vector<std::pair<std::string, std::string>> wordList_; ///< Список слов и категорий
 
-    // Загрузка слов из файла
-    bool loadWordList(const std::string& filename);
-    // Метод для новой игры
-    void startNewGame();
-    // Метод для проверки угаданной буквы
-    void checkLetterInWord(int letterIndex);
-    // Метод для отрисовки текущего состояния слова
-    void renderWordProgress();
+    bool loadWordList(const std::string& filename); ///< Загружает слова из файла
+    void startNewGame(); ///< Начинает новую игру (случайное слово)
+    void checkLetterInWord(int letterIndex); ///< Проверяет, есть ли буква в слове
+    void renderWordProgress(); ///< Отрисовывает угаданные буквы и категорию
 
 
-    ///// Работа с клавиатурой
-    // Выведенная клавиатура
-    std::string currentWord_;        // Текущее загаданное слово
-    std::vector<bool> wordProgress_; // Угаданные буквы в слове
+    std::string currentWord_; ///< Текущее загаданное слово
+    std::vector<bool> wordProgress_; ///< Угаданы ли буквы (true – угадана)
 
-    // Метод для отрисовки буквенной клавиатуры
-    void renderKeyboard();
+    void renderKeyboard(); ///< Отрисовывает экранную клавиатуру
 
-    // Метод для отрисовки виселицы
-    void renderHangman();
+    void renderHangman(); ///< Отрисовывает части виселицы в зависимости от числа ошибок
 };

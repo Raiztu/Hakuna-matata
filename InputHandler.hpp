@@ -5,68 +5,75 @@
 #include <iostream>  
 #include <vector>    
 
+/// @brief Номера кнопок мыши для удобства (индексы массива)
 enum mouse_buttons {
-    LEFT = SDL_BUTTON_LEFT - 1,
-    MIDDLE = SDL_BUTTON_MIDDLE - 1,
-    RIGHT = SDL_BUTTON_RIGHT - 1,
-    BACK = SDL_BUTTON_X1 - 1,
-    FORW = SDL_BUTTON_X2 - 1
+    LEFT = SDL_BUTTON_LEFT - 1, ///< Левая кнопка
+    MIDDLE = SDL_BUTTON_MIDDLE - 1, ///< Средняя кнопка
+    RIGHT = SDL_BUTTON_RIGHT - 1, ///< Правая кнопка
+    BACK = SDL_BUTTON_X1 - 1, ///< Кнопка "Назад" (X1)
+    FORW = SDL_BUTTON_X2 - 1 ///< Кнопка "Вперёд" (X2)
 };
 
+/// @brief Базовый класс для обработки ввода
 class InputHandler {
 public:
     InputHandler();
     virtual ~InputHandler() { delete mousePosition_; }
 
-    void handle(SDL_Event event); // Обработка события
-    Vector2D* getMousePosition(); // Координаты мыши
-    bool getMouseButtonState(int buttonNumber); // Проверка, нажата ли кнопка мыши
-    bool isKeyDown(SDL_Scancode key); // Проверка, нажата ли клавиша
+    /// @brief Обрабатывает событие SDL
+    /// @param event Событие SDL
+    void handle(SDL_Event event); 
+    /// @brief Возвращает текущую позицию мыши
+    Vector2D* getMousePosition(); 
+    /// @brief Проверяет, нажата ли кнопка мыши
+    /// @param buttonNumber Номер кнопки (из enum mouse_buttons)
+    bool getMouseButtonState(int buttonNumber); 
+    /// @brief Проверяет, нажата ли клавиша на клавиатуре
+    /// @param key Скан-код клавиши
+    bool isKeyDown(SDL_Scancode key);
 
-    // Виртуальные методы для переопределения
+    /// Виртуальные методы для переопределения
     virtual void onMouseButtonDown(SDL_Event event);
     virtual void onMouseButtonUp(SDL_Event event);
     virtual void onMouseMotion(SDL_Event event);
     virtual void onKeyDown(SDL_Event event);
 
-    // Методы для проверки кликов на иконки и в этих диалогах
+    /// @brief Скан-код клавиши
+    /// @return true, если клик был по иконке помощи
     bool checkHelpIconClick(int x, int y);
+    /// @brief Проверяет клик по иконке звука
+    /// @return true, если клик был по иконке звука
     bool checkSoundIconClick(int x, int y);
+    /// @brief Проверяет клик в диалоге помощи (кнопка "Понятно")
     bool checkHelpDialogClick(int x, int y);
+    /// @brief Проверяет клик в диалоге звука (кнопка "OK")
     bool checkSoundDialogClick(int x, int y);
+    void updateSliderHandlePosition(); ///< Обновляет позицию кружка ползунка
 
-    void updateSliderHandlePosition(); // обновить позицию кружка
+    void resetCommonFlags(); ///< Сбрасывает общие флаги (helpConfirmed, soundConfirmed, isDraggingSlider)
 
-    void resetCommonFlags();
+    void enterHelpMode(); ///<  Вход в режим помощи
+    void exitHelpMode(); ///<  Выход из режима помощи
+    void enterSoundMode(); ///<  Вход в режим звука
+    void exitSoundMode(); ///<  Выход из режима звука
 
-    void enterHelpMode(); // Вход в режим помощи
-    void exitHelpMode(); // Выход из режима помощи
-    void enterSoundMode(); // Вход в режим звука
-    void exitSoundMode(); // Выход из режима звука
+    bool isHelpMode; ///< Активен ли диалог помощи
+    bool isSoundMode; ///< Активен ли диалог звука
+    bool helpConfirmed; ///<  Для диалога помощи соглашения (закрыть диалог)
+    bool soundConfirmed; ///<  Для диалога звука (закрыть диалог)
 
-    // Флаги для определения, в каком мы режиме (чтобы отрисовывать)
-    bool isHelpMode;
-    bool isSoundMode;
-    // Для диалога помощи соглашения (закрыть диалог)
-    bool helpConfirmed;
-    // Для диалога звука (закрыть диалог)
-    bool soundConfirmed;
+    int sliderX, sliderY; ///<  координаты ползунка (левая точка)
+    int sliderWidth; ///<  ширина ползунка
+    int sliderHandleX; ///<  текущая X позиция кружка
 
-    // Позиции ползунка 
-    int sliderX, sliderY; // координаты ползунка (левая точка)
-    int sliderWidth; // ширина ползунка
-    int sliderHandleX; // текущая X позиция кружка
+    bool isDraggingSlider; ///< Перетаскивается ли кружок в данный момент
+    float volumeLevel; ///< Уровень громкости от 0.0 до 1.0 
 
-    // Для ползунка громкости
-    bool isDraggingSlider; // перетаскивается ли кружок
-    float volumeLevel; // уровень громкости от 0.0 до 1.0 
-
-    // Для синхронизации звука между состояниями
-    float getVolumeLevel() const;
-    void setVolumeLevel(float level);
+    float getVolumeLevel() const; ///< Возвращает текущую громкость (0..1)
+    void setVolumeLevel(float level); ///< Устанавливает громкость и обновляет положение кружка
 
 protected:
-    Vector2D* mousePosition_;
-    std::vector<bool> mouseStates_;
-    const bool* keystates_;
+    Vector2D* mousePosition_; ///< Текущая позиция мыши
+    std::vector<bool> mouseStates_; ///< Состояния кнопок мыши (нажата/не нажата)
+    const bool* keystates_; ///< Состояния клавиш клавиатуры (от SDL)
 };

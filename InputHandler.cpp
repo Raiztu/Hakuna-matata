@@ -7,10 +7,9 @@ InputHandler::InputHandler() : helpConfirmed(false), soundConfirmed(false), isHe
     }
     mousePosition_ = new Vector2D(0, 0);
 
-    // Инициализация ползунка
     sliderWidth = 400;
-    sliderX = 35 + (650 - sliderWidth) / 2; // 160 (горизонтальный центр)
-    sliderY = 305 + 350 / 2 + 20; // 480 (вертикальный центр)
+    sliderX = 35 + (650 - sliderWidth) / 2;
+    sliderY = 305 + 350 / 2 + 20; 
     updateSliderHandlePosition();
 }
 
@@ -50,7 +49,6 @@ void InputHandler::handle(SDL_Event event) {
     }
 }
 
-// Базовая реализация
 
 void InputHandler::onMouseButtonDown(SDL_Event event) {
     if (event.button.button == SDL_BUTTON_LEFT) {
@@ -60,10 +58,10 @@ void InputHandler::onMouseButtonDown(SDL_Event event) {
     }
 }
 
-void InputHandler::onMouseButtonUp(SDL_Event event) { //завершение перетаскивания кружка, когда лкм не нажата
+void InputHandler::onMouseButtonUp(SDL_Event event) { 
     if (event.button.button == SDL_BUTTON_LEFT) {
         isDraggingSlider = false;
-        if (LEFT >= 0 && LEFT < static_cast<int>(mouseStates_.size())) { // проверяем, что индекс левой кнопки (LEFT) в пределах массива состояний мыши
+        if (LEFT >= 0 && LEFT < static_cast<int>(mouseStates_.size())) { 
             mouseStates_[LEFT] = false;
         }
     }
@@ -102,7 +100,6 @@ void InputHandler::onKeyDown(SDL_Event event) {
     }
 }
 
-// Методы для иконок звука и помощи
 bool InputHandler::checkHelpIconClick(int x, int y) {
     float helpLeft = 30, helpRight = 142, helpTop = 30, helpBottom = 142;
     if (x >= helpLeft && x <= helpRight && y >= helpTop && y <= helpBottom) {
@@ -144,13 +141,13 @@ bool InputHandler::checkSoundDialogClick(int x, int y) {
 }
 
 void InputHandler::updateSliderHandlePosition() {
-    int handleWidth = 40; //ширина кружка в пикселях
-    sliderHandleX = sliderX + (int)(sliderWidth * volumeLevel) - (handleWidth / 2); // X-координата кружка: начало ползунка + смещение от громкости - половина ширины кружка
+    int handleWidth = 40;
+    sliderHandleX = sliderX + (int)(sliderWidth * volumeLevel) - (handleWidth / 2); 
 
-    int minHandleX = sliderX - (handleWidth / 2); // минимально возможная X-координата кружка 
-    int maxHandleX = sliderX + sliderWidth - (handleWidth / 2); // максимально возможная X-координата кружка
-    if (sliderHandleX < minHandleX) sliderHandleX = minHandleX; // если вышли за левую границу – прижимаем к левой
-    if (sliderHandleX > maxHandleX) sliderHandleX = maxHandleX; // если вышли за правую границу – прижимаем к правой
+    int minHandleX = sliderX - (handleWidth / 2);  
+    int maxHandleX = sliderX + sliderWidth - (handleWidth / 2); 
+    if (sliderHandleX < minHandleX) sliderHandleX = minHandleX;
+    if (sliderHandleX > maxHandleX) sliderHandleX = maxHandleX; 
 }
 
 void InputHandler::resetCommonFlags() {
@@ -181,7 +178,6 @@ void InputHandler::exitSoundMode() {
     resetCommonFlags();
 }
 
-// Для синхронизации звука между состояниями
 float InputHandler::getVolumeLevel() const { return volumeLevel; }
 void InputHandler::setVolumeLevel(float level) {
     volumeLevel = level;

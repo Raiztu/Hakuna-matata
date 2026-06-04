@@ -60,7 +60,6 @@ void TextureManager::drawFrame(std::string tag, float x, float y, float width,
         NULL, flip);
 }
 
-// Для работы с текстом
 bool TextureManager::loadFont(std::string fontPath, std::string fontTag, int fontSize) {
 TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
     if (font == nullptr) {
@@ -75,9 +74,9 @@ TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
 }
 
 SDL_Texture* TextureManager::createTextTexture(const std::string& text, const std::string& fontTag, SDL_Color color, SDL_Renderer* renderer) {
-    TTF_Font* font = defaultFont_; //запасной вариант
+    TTF_Font* font = defaultFont_; 
     if (fontMap_.find(fontTag) != fontMap_.end()) { 
-        font = fontMap_[fontTag]; // меняем, если нашли
+        font = fontMap_[fontTag]; 
     }
 
     if (font == nullptr) {
@@ -85,26 +84,26 @@ SDL_Texture* TextureManager::createTextTexture(const std::string& text, const st
         return nullptr;
     }
 
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), 0, color); // Рендеринг текста в поверхность
+    SDL_Surface* surface = TTF_RenderText_Blended(font, text.c_str(), 0, color); 
     if (surface == nullptr) {
         std::cerr << "Failed to create text surface" << std::endl;
         return nullptr;
     }
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface); // Преобразование поверхности в текстуру
-    SDL_DestroySurface(surface); // Больше не нужна
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface); 
+    SDL_DestroySurface(surface); 
 
     return texture;
 }
 
 float TextureManager::getCenteredX(const std::string& text, const std::string& fontTag, SDL_Color color, SDL_Renderer* renderer, float screenWidth) {
     if (text.empty()) {
-        return screenWidth / 2; // центр экрана для пустого текста
+        return screenWidth / 2;
     }
 
     SDL_Texture* tempTexture = createTextTexture(text, fontTag, color, renderer);
     if (tempTexture == nullptr) {
-        return screenWidth / 2; // если не удалось создать, возвращаем центр
+        return screenWidth / 2; 
     }
 
     float texW, texH;
@@ -118,16 +117,16 @@ void TextureManager::drawText(const std::string& text, const std::string& fontTa
     SDL_Texture* textTexture = createTextTexture(text, fontTag, color, renderer);
     if (textTexture != nullptr) {
         float texW, texH;
-        SDL_GetTextureSize(textTexture, &texW, &texH); // записываем реальные ширину и высоту
+        SDL_GetTextureSize(textTexture, &texW, &texH); 
 
-        SDL_FRect dstRect; // Структура для хранения прямоугольника (область экрана)
+        SDL_FRect dstRect; 
         dstRect.x = x;
         dstRect.y = y;
         dstRect.w = texW;
         dstRect.h = texH;
 
-        SDL_RenderTexture(renderer, textTexture, nullptr, &dstRect); // Отрисовка
-        SDL_DestroyTexture(textTexture); // Временную текстуру уничтожаем
+        SDL_RenderTexture(renderer, textTexture, nullptr, &dstRect); 
+        SDL_DestroyTexture(textTexture); 
     }
 }
 
@@ -177,10 +176,10 @@ bool TextureManager::initTTF() {
 void TextureManager::cleanupTTF() {
     for (auto& pair : fontMap_) {
         if (pair.second != nullptr) {
-            TTF_CloseFont(pair.second); // Очищает память, закрывает файл шрифта, и теперь pair.second недействительный
+            TTF_CloseFont(pair.second); 
         }
     }
-    fontMap_.clear(); // Удаляет все элементы из map
+    fontMap_.clear(); 
     defaultFont_ = nullptr;
     TTF_Quit();
 }

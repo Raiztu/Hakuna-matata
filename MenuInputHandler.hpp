@@ -2,31 +2,42 @@
 
 #include "InputHandler.hpp"
 
+/// @brief Обработчик ввода для главного меню
 class MenuInputHandler : public InputHandler {
 public:
     MenuInputHandler();
     ~MenuInputHandler();
 
+    /// @brief Обрабатывает нажатие кнопки мыши в меню
+    /// @param event Событие SDL
     virtual void onMouseButtonDown(SDL_Event event) override;
+    /// @brief Обрабатывает нажатие клавиши (Escape для выхода)
+    /// @param event Событие SDL
     virtual void onKeyDown(SDL_Event event) override;
 
-    // Метод для проверки клика по кнопкам 
+    /// @brief Проверяет, нажата ли кнопка "Играть" или "Выход"
+    /// @param x Координата X клика
+    /// @param y Координата Y клика
+    /// @return true, если клик по одной из кнопок
     bool checkButtonClick(int x, int y);
-    // Метод для проверки кликов в диалоге выхода
+    /// @brief Проверяет клик в диалоге подтверждения выхода
+    /// @param x Координата X
+    /// @param y Координата Y
+    /// @return true, если клик по кнопке "Да" или "Нет"
     bool checkConfirmDialogClick(int x, int y);
 
-    // Для главного меню
-    bool playClicked;
-    bool exitClicked;
+    bool playClicked; ///< Нажата ли кнопка "Играть"
+    bool exitClicked; ///< Нажата ли кнопка "Выход"
 
-    // Флаги для определения, в каком мы режиме (чтобы отрисовывать)
-    bool isConfirmMode; // true = показываем диалог, false = главное меню
+    bool isConfirmMode; ///< Активен ли диалог подтверждения выхода
 
-    // Для диалога выхода подтверждения (закрыть диалог)
-    bool confirmExitConfirmed; // согласиться
-    bool confirmExitCancelled; // остаться
+    bool confirmExitConfirmed; ///< Подтверждён ли выход (кнопка "Да")
+    bool confirmExitCancelled; ///< Отменён ли выход (кнопка "Нет")
 
-    void resetFlags();
-    void enterConfirmMode(); // Вход в режим подтверждения
-    void exitConfirmMode(); // Выход из режима подтверждения
+    /// @brief Сбрасывает все флаги кнопок и диалога
+    void resetFlags(); 
+    /// @brief Включает режим диалога подтверждения выхода
+    void enterConfirmMode(); 
+    /// @brief Выключает режим диалога подтверждения выхода
+    void exitConfirmMode(); 
 };

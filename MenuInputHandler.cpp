@@ -14,7 +14,7 @@ bool MenuInputHandler::checkButtonClick(int x, int y) {
     }
 
     if (x >= exitLeft && x <= exitRight && y >= exitTop && y <= exitBottom) {
-        enterConfirmMode(); // переключаем в режим подтверждения
+        enterConfirmMode(); 
         return true;
     }
 
@@ -61,7 +61,7 @@ void MenuInputHandler::exitConfirmMode() {
 }
 
 void MenuInputHandler::onMouseButtonDown(SDL_Event event) {
-    // Сначала вызываем базовую обработку (для обновления состояний кнопок)
+    
     InputHandler::onMouseButtonDown(event);
 
     if (event.button.button == SDL_BUTTON_LEFT) {
@@ -74,23 +74,19 @@ void MenuInputHandler::onMouseButtonDown(SDL_Event event) {
             return;
         }
 
-        // Проверяем режимы
-        // код обработки клика мыши в режиме звука
         if (isSoundMode) {
-            // Проверяем клик по кружку ползунка
-            int handleSize = 40; // размер кружка 
-            int handleLeft = sliderHandleX; // левая граница кружка по X
-            int handleRight = sliderHandleX + handleSize; // правая граница кружка по X
-            int handleTop = sliderY - 15; // верхняя граница кружка (центр ползунка - 15)
-            int handleBottom = sliderY + 15; // нижняя граница кружка (центр ползунка + 15)
+            int handleSize = 40; 
+            int handleLeft = sliderHandleX; 
+            int handleRight = sliderHandleX + handleSize; 
+            int handleTop = sliderY - 15; 
+            int handleBottom = sliderY + 15; 
 
-            // если клик мыши попал в область кружка
             if (event.button.x >= handleLeft && event.button.x <= handleRight &&
                 event.button.y >= handleTop && event.button.y <= handleBottom) {
-                isDraggingSlider = true; // начинаем перетаскивание кружка
+                isDraggingSlider = true; 
             }
             else {
-                checkSoundDialogClick(event.button.x, event.button.y); //проверяем клик по кнопке в диалоге тогда
+                checkSoundDialogClick(event.button.x, event.button.y); 
             }
         }
         else if (isConfirmMode) {

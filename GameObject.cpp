@@ -1,4 +1,4 @@
-#include "GameObject.hpp"
+﻿#include "GameObject.hpp"
 
 #include "TextureManager.hpp"
 
@@ -17,7 +17,6 @@ void GameObject::draw(SDL_Renderer* renderer) {
 }
 
 void GameObject::update() {
-    // x_ += 0.1;
     currentFrame_ = int(((SDL_GetTicks() / 1000) % 6));
 }
 
